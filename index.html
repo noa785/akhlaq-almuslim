@@ -151,11 +151,25 @@ table.mini th{background:var(--teal2);color:var(--tealD)}
 <div class="hero"><h1>رحلة لغتي</h1><p>الصف الثالث · الفصل الأول</p><p style="font-weight:600;margin-top:8px">اختاري من أين تبدئين اليوم</p></div>
 <a class="big" href="exam/index.html"><span class="badge" style="background:var(--orange)">اختبار الفترة الثانية</span><h2>أخلاق المسلم</h2><p>الوحدة الثالثة فقط · من ص 96 إلى ص 122<br>حدود الاختبار المحددة</p><div class="pb"><i id="p1" style="width:0;background:var(--orange)"></i></div><p class="go" style="color:var(--orange)" id="t1">ابدئي ←</p></a>
 <a class="big" href="book/index.html"><span class="badge" style="background:var(--teal)">كامل الكتاب</span><h2>الوحدات الأربع</h2><p>التعامل مع الآخرين · ربوع من بلادي · أخلاق المسلم · وسائل الاتصالات<br>من ص 13 إلى ص 170</p><div class="pb"><i id="p2" style="width:0;background:var(--teal)"></i></div><p class="go" style="color:var(--tealD)" id="t2">ابدئي ←</p></a>
+<div id="instBox" style="margin-top:16px"><button class="btn" id="instBtn" style="background:var(--orange);box-shadow:0 5px 0 #b84a1a">📲 ثبّتي التطبيق على جوالك</button><div id="instHelp" class="tip" style="display:none;margin-top:12px;line-height:1.9"></div></div>
 <p class="credit">تصميم وتطوير: نورة الدوسري</p>
 </div>
 <script>
 function prog(key,total,bar,txt){try{const s=JSON.parse(localStorage.getItem(key)||"null");if(!s)return;const st=Object.values(s.done||{}).reduce((a,b)=>a+b,0);document.getElementById(bar).style.width=Math.round(st/total*100)+"%";document.getElementById(txt).textContent=st+" من "+total+" نجمة · "+(s.xp||0)+" نقطة · تابعي ←"}catch(e){}}
 prog("khuluq-v1",39,"p1","t1");prog("lughati-v1",129,"p2","t2");
+
+let deferred=null;
+const standalone=matchMedia("(display-mode: standalone)").matches||navigator.standalone;
+if(standalone)document.getElementById("instBox").style.display="none";
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e});
+addEventListener("appinstalled",()=>{document.getElementById("instBox").style.display="none"});
+document.getElementById("instBtn").onclick=async()=>{
+  const h=document.getElementById("instHelp");
+  if(deferred){deferred.prompt();const r=await deferred.userChoice.catch(()=>null);deferred=null;if(r&&r.outcome==="accepted"){document.getElementById("instBox").style.display="none"}return}
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+  h.style.display="block";
+  h.innerHTML=ios?"<b>في الآيفون والآيباد:</b><br>1. افتحي الرابط من متصفح Safari.<br>2. اضغطي زر المشاركة (المربع اللي فيه سهم لفوق) أسفل الشاشة.<br>3. اختاري «إضافة إلى الشاشة الرئيسية» ثم «إضافة».":"<b>في جوالات أندرويد:</b><br>1. افتحي الرابط من متصفح Chrome.<br>2. اضغطي النقاط الثلاث ⋮ أعلى الشاشة.<br>3. اختاري «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».";
+};
 if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}
 </script>
 </body>
