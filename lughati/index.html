@@ -901,8 +901,8 @@ ex:[
 ]}
 ];
 /* ============ STATE ============ */
-const KEY="khuluq-v1";
-let S={xp:0,done:{},days:[],best:0,u:3};
+const KEY="lughati-v1";
+let S={xp:0,done:{},days:[],best:0,u:1};
 try{const s=JSON.parse(localStorage.getItem(KEY)||"null"); if(s) S=Object.assign(S,s);}catch(e){}
 
 const UNITS=[
@@ -942,8 +942,9 @@ function home(){
     const st=S.done[l.id]||0;
     h+=`<button class="node ${l.kind} ${st?'done':''}" data-i="${i}"><span class="ic">${i+1}</span><span class="tx"><b>${l.title}</b><span>${l.pages} · ${l.ex.length} أسئلة</span></span><span class="stars">${STAR(st>=1)}${STAR(st>=2)}${STAR(st>=3)}</span></button>`;
   });
-  h+=`</div><div class="parent"><b>للأم:</b> النصوص والقواعد والإملاء منقولة من كتاب الطالب (لغتي، الصف الثالث، الفصل الأول، طبعة 1448هـ). نصوص "التحدي الكبير" في الوحدات 1 و2 و4 هي نماذج الاختبار من الكتاب نفسه، ونص تحدي الوحدة 3 من تأليفنا للتدريب على نمط الأسئلة المركزية. الأسئلة البنفسجية (فكّري) أسئلة مهارات تفكير عليا. نصوص الاستماع غير موجودة في كتاب الطالب، فأخذنا منها ما في الكتاب فقط. أسئلة (اكتبي) إجابتها النموذجية للاسترشاد، وأي إجابة صحيحة بمعناها مقبولة.</div><p class="credit">تصميم وتطوير: نورة الدوسري</p>`;
+  h+=`</div><div class="parent"><b>للأم:</b> النصوص والقواعد والإملاء منقولة من كتاب الطالب (لغتي، الصف الثالث، الفصل الأول، طبعة 1448هـ). نصوص "التحدي الكبير" في الوحدات 1 و2 و4 هي نماذج الاختبار من الكتاب نفسه، ونص تحدي الوحدة 3 من تأليفنا للتدريب على نمط الأسئلة المركزية. الأسئلة البنفسجية (فكّري) أسئلة مهارات تفكير عليا. نصوص الاستماع غير موجودة في كتاب الطالب، فأخذنا منها ما في الكتاب فقط. أسئلة (اكتبي) إجابتها النموذجية للاسترشاد، وأي إجابة صحيحة بمعناها مقبولة. التقدم يُحفظ على هذا الجهاز فقط بدون تسجيل، ولا يُرسل لأي مكان، وكل جهاز له نقاطه الخاصة.</div><div id="rst" style="margin-top:16px"><button class="btn ghost" id="rs1">مسح تقدمي والبدء من جديد</button></div><p class="credit">تصميم وتطوير: نورة الدوسري</p>`;
   app.innerHTML=h;
+  document.getElementById("rs1").onclick=()=>{document.getElementById("rst").innerHTML=`<div class="fb no"><b>متأكدة؟</b>ستُحذف كل النقاط والنجوم والأيام من هذا الجهاز فقط.</div><div class="row"><button class="btn bad" id="rsy">نعم، امسحي</button><button class="btn ghost" id="rsn">تراجعي</button></div>`;document.getElementById("rsn").onclick=home;document.getElementById("rsy").onclick=()=>{S={xp:0,done:{},days:[],best:0,u:1};save();home()}};
   app.querySelectorAll(".ucard").forEach(b=>b.onclick=()=>{S.u=+b.dataset.u;save();home()});
   app.querySelectorAll(".node").forEach(b=>b.onclick=()=>start(+b.dataset.i));
   window.scrollTo(0,0);
