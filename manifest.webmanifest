@@ -1,0 +1,16 @@
+{
+  "name": "رحلة أخلاق المسلم",
+  "short_name": "أخلاق المسلم",
+  "description": "مذاكرة لعبية لوحدة أخلاق المسلم في لغتي، الصف الثالث الابتدائي",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF7F2",
+  "theme_color": "#F2C4B3",
+  "icons": [
+    {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}
+  ]
+}
