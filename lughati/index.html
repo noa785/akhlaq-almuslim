@@ -1,0 +1,1129 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F2C4B3">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="رحلة لغتي">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>رحلة لغتي</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@600;800&family=Noto+Naskh+Arabic:wght@400;600;700&family=Tajawal:wght@500;700;800&display=swap">
+<style>
+/* Layout: one-column phone-first game. Home = winding lesson path; lesson = full screen card flow. Palette from the unit 3 book header (peach, teal, orange, blue). Single bright look by choice. */
+:root{
+  --bg:#FFF7F2; --card:#FFFFFF; --ink:#24343A; --mut:#6B7C80;
+  --peach:#F2C4B3; --peach2:#FBE6DD; --teal:#25A8AE; --teal2:#E0F4F4; --tealD:#14787D;
+  --orange:#F26A2E; --orange2:#FFE4D6; --blue:#1767B0; --blue2:#E2EEFA;
+  --good:#2BA84A; --good2:#E3F6E7; --bad:#E0473C; --bad2:#FDE7E5; --gold:#F5B700; --line:#EBD9D0;
+  --f-disp:"Baloo Bhaijaan 2","Tajawal",system-ui,sans-serif;
+  --f-ui:"Tajawal",system-ui,sans-serif;
+  --f-read:"Noto Naskh Arabic","Tajawal",serif;
+  color-scheme:light;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:17px;direction:rtl;margin:0;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box}
+button{font-family:inherit;color:inherit}
+.wrap{max-width:560px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:12px 40px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 0 10px}
+.chip{display:flex;align-items:center;gap:6px;font-weight:800;font-size:16px;background:var(--card);border:2px solid var(--line);border-radius:999px;padding:4px 12px;font-variant-numeric:tabular-nums}
+.chip svg{width:20px;height:20px}
+.hero{background:linear-gradient(135deg,var(--peach) 0%,var(--peach2) 100%);border-radius:24px;padding:18px 18px 16px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;left:-30px;top:-30px;width:150px;height:150px;background:conic-gradient(from 200deg,var(--teal) 0 18%,var(--blue) 18% 30%,var(--orange) 30% 44%,transparent 44%);opacity:.9;transform:rotate(-12deg);border-radius:20px}
+.hero h1{font-family:var(--f-disp);font-weight:800;font-size:30px;margin:0;line-height:1.2;position:relative;z-index:1;text-wrap:balance}
+.hero p{margin:6px 0 0;color:#5a3b30;font-weight:700;position:relative;z-index:1}
+.lvl{margin-top:12px;position:relative;z-index:1}
+.lvl .bar{height:12px;background:#fff;border-radius:99px;overflow:hidden}
+.lvl .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--orange));border-radius:99px;transition:width .6s}
+.lvl small{display:flex;justify-content:space-between;font-weight:700;margin-top:4px;color:#5a3b30}
+/* path */
+.path{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+.sect{font-family:var(--f-disp);font-weight:800;font-size:20px;margin:14px 0 2px;color:var(--tealD)}
+.node{display:flex;align-items:center;gap:14px;background:var(--card);border:2px solid var(--line);border-bottom-width:5px;border-radius:20px;padding:12px 14px;cursor:pointer;text-align:right;width:100%;transition:transform .12s}
+.node:active{transform:translateY(3px);border-bottom-width:2px}
+.node:focus-visible,.btn:focus-visible,.opt:focus-visible,.tile:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.node .ic{flex:none;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-disp);font-weight:800;font-size:22px;color:#fff;background:var(--teal);box-shadow:inset 0 -4px 0 rgba(0,0,0,.15)}
+.node.read .ic{background:var(--blue)} .node.word .ic{background:var(--orange)} .node.dict .ic{background:#8B5CC7} .node.boss .ic{background:var(--gold);color:#5a3b00}
+.node .tx{flex:1;min-width:0}
+.node b{display:block;font-size:17.5px}
+.node span{color:var(--mut);font-size:14px}
+.stars{display:flex;gap:2px;flex:none}
+.stars svg{width:18px;height:18px}
+.node.done{border-color:#bfe6c8;background:#F6FFF8}
+.parent{margin-top:22px;background:var(--teal2);border-radius:16px;padding:12px 14px;font-size:14.5px;line-height:1.7}
+.parent b{color:var(--tealD)}
+/* lesson screen */
+.lhead{display:flex;align-items:center;gap:10px;padding:8px 0 12px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5}
+.x{border:0;background:none;font-size:26px;line-height:1;cursor:pointer;color:var(--mut);padding:4px 6px}
+.prog{flex:1;height:16px;background:#F0E2DA;border-radius:99px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--good);border-radius:99px;transition:width .4s}
+.combo{font-weight:800;color:var(--orange);min-width:44px;text-align:center;font-variant-numeric:tabular-nums}
+.card{background:var(--card);border:2px solid var(--line);border-radius:22px;padding:18px;animation:pop .25s ease}
+@keyframes pop{from{transform:scale(.97);opacity:.4}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.tag{display:inline-block;font-weight:800;font-size:13px;border-radius:99px;padding:2px 10px;background:var(--teal2);color:var(--tealD);margin-bottom:8px}
+.tag.hots{background:#EFE6FA;color:#6A3EA8}
+.q{font-family:var(--f-disp);font-weight:800;font-size:22px;line-height:1.45;margin:0 0 14px;text-wrap:balance}
+.learn h2{font-family:var(--f-disp);font-size:24px;margin:0 0 8px;color:var(--tealD)}
+.learn p,.learn li{line-height:1.85;font-size:17.5px}
+.learn ul{padding-inline-start:20px;margin:6px 0}
+.ex{background:var(--orange2);border-radius:14px;padding:8px 12px;margin:8px 0;font-family:var(--f-read);font-size:19px;line-height:1.9}
+.tip{background:var(--blue2);border-radius:14px;padding:8px 12px;margin:8px 0;font-weight:700;color:#0f4c86}
+.story{font-family:var(--f-read);font-size:21px;line-height:2.15}
+.story p{margin:0 0 10px}
+.gl{background:linear-gradient(transparent 60%,#FFD9C7 60%);cursor:pointer;border-radius:4px}
+.ayah{color:#1E7A3C;font-weight:700}
+.meaning{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));background:var(--ink);color:#fff;border-radius:14px;padding:10px 14px;font-size:17px;margin-top:10px}
+.meaning[hidden]{display:none!important}
+.opts{display:grid;gap:10px}
+.opt{display:block;width:100%;text-align:right;background:var(--card);border:2px solid var(--line);border-bottom-width:4px;border-radius:16px;padding:12px 14px;font-size:18.5px;font-weight:700;cursor:pointer;font-family:var(--f-read)}
+.opt.sel{border-color:var(--blue);background:var(--blue2)}
+.opt.ok{border-color:var(--good);background:var(--good2)}
+.opt.no{border-color:var(--bad);background:var(--bad2)}
+.tf{grid-template-columns:1fr 1fr}
+.tf .opt{text-align:center;font-family:var(--f-ui);font-size:20px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cols>div{display:grid;gap:8px;align-content:start;min-width:0}
+.tile{background:var(--card);border:2px solid var(--line);border-bottom-width:4px;border-radius:14px;padding:10px;font-size:17.5px;font-weight:700;cursor:pointer;text-align:center;font-family:var(--f-read);min-height:52px}
+.tile.sel{border-color:var(--blue);background:var(--blue2)}
+.tile.gone{opacity:.25;pointer-events:none;border-color:var(--good);background:var(--good2)}
+.tile.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(5px)}50%{transform:translateX(-5px)}75%{transform:translateX(3px)}}
+.pool{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:12px;min-height:56px}
+.bins{display:grid;gap:10px}
+.bin{border:2px dashed var(--teal);border-radius:16px;padding:8px;min-height:64px;background:var(--teal2);cursor:pointer}
+.bin h4{margin:0 0 6px;font-size:16px;color:var(--tealD)}
+.bin .in{display:flex;flex-wrap:wrap;gap:6px}
+.bin .in span{background:#fff;border-radius:10px;padding:2px 10px;font-family:var(--f-read);font-weight:700}
+.line{min-height:62px;border-bottom:3px solid var(--line);display:flex;flex-wrap:wrap;gap:8px;padding:6px 0 10px;margin-bottom:14px}
+.foot{position:sticky;bottom:0;padding:14px 0 calc(14px + env(safe-area-inset-bottom,0px));background:var(--bg)}
+.fb{border-radius:18px;padding:12px 14px;margin-bottom:10px;font-size:17px;line-height:1.7;animation:pop .2s}
+.fb.ok{background:var(--good2);color:#17602a}
+.fb.no{background:var(--bad2);color:#8d221b}
+.fb b{font-family:var(--f-disp);font-size:20px;display:block}
+.btn{width:100%;border:0;border-radius:16px;padding:14px;font-size:19px;font-weight:800;cursor:pointer;color:#fff;background:var(--teal);box-shadow:0 5px 0 var(--tealD)}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--tealD)}
+.btn[disabled]{background:#D8CFCB;box-shadow:0 5px 0 #bfb5b0;cursor:default}
+.btn.go{background:var(--good);box-shadow:0 5px 0 #1d7a35}
+.btn.bad{background:var(--bad);box-shadow:0 5px 0 #a8322a}
+.btn.ghost{background:var(--card);color:var(--tealD);box-shadow:0 5px 0 var(--line);border:2px solid var(--line)}
+.row{display:flex;gap:10px}
+.dictbox{font-family:var(--f-read);font-size:21px;line-height:2.1;background:#FFFDF8;border:2px solid var(--line);border-radius:16px;padding:12px}
+.dictbox.hide{filter:blur(9px);user-select:none}
+.mk{display:inline-block;color:#fff;font-weight:800;border-radius:99px;padding:2px 12px;font-size:14px;background:var(--orange);margin-bottom:6px}
+.mk.p{background:#8B5CC7}
+/* result */
+.res{text-align:center;padding-top:20px}
+.res h2{font-family:var(--f-disp);font-size:34px;margin:10px 0 4px;color:var(--tealD)}
+.bigstars{display:flex;justify-content:center;gap:10px;margin:10px 0}
+.bigstars svg{width:58px;height:58px;animation:pop .5s backwards}
+.bigstars svg:nth-child(2){animation-delay:.15s}.bigstars svg:nth-child(3){animation-delay:.3s}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.stat{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:12px}
+.stat b{display:block;font-family:var(--f-disp);font-size:28px;color:var(--orange);font-variant-numeric:tabular-nums}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+.mascot{width:96px;height:96px;margin:0 auto}
+table.mini{width:100%;border-collapse:collapse;font-size:16px;margin:6px 0}
+table.mini td,table.mini th{border:1.5px solid var(--line);padding:5px 8px;text-align:right}
+table.mini th{background:var(--teal2);color:var(--tealD)}
+
+.units{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.ucard{border:2px solid var(--line);border-bottom-width:5px;border-radius:18px;padding:10px 12px;background:var(--card);cursor:pointer;text-align:right;min-width:0}
+.ucard .n{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;color:#fff;font-family:var(--f-disp);font-weight:800;font-size:17px;margin-bottom:4px}
+.ucard b{display:block;font-size:16px;line-height:1.35}
+.ucard small{color:var(--mut);font-weight:700;font-size:13px}
+.ucard .ub{height:7px;background:#F0E2DA;border-radius:99px;overflow:hidden;margin-top:6px}
+.ucard .ub i{display:block;height:100%;border-radius:99px}
+.ucard.on{border-color:var(--ink);box-shadow:0 0 0 2px var(--ink) inset}
+
+.hero p{max-width:75%}
+.credit{text-align:center;color:var(--mut);font-size:13px;margin-top:18px;font-weight:700}
+</style>
+
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ================= الوحدة الأولى: التعامل مع الآخرين (ص 13 إلى 52) ================= */
+const U1 = [
+{id:"u1-start", kind:"word", sect:"البداية", title:"الأوصاف والاستماع والنشيد", pages:"ص 15 إلى 21",
+learn:[
+ {h:"أوصاف تعجبنا وأوصاف لا تعجبنا", b:`<p><b>أوصاف حسنة:</b> كريم، متعاون، مهذّب، صادق، رحيم، أمين.<br><b>أوصاف سيئة:</b> مبذّر، طمّاع، كذّاب، غشّاش، ظالم، بخيل.</p><p class="tip">قال ﷺ: «إنَّ من خيارِكم أحسنَكم أخلاقًا».</p>`},
+ {h:"نص الاستماع: شكرًا يا جاري", b:`<ul><li>الشقيقان <b>طارق وزياد</b> يلعبان الكرة في <b>فناء منزلهما</b>، والشخصيات: طارق، زياد، الجار.</li><li><b>طارق</b> قرع الباب <b>بلطف</b>.</li><li><b>زياد</b> صاح بأعلى صوته: هيا، أعطوني الكرة بسرعة، ففتح الجار الباب <b>غاضبًا</b>.</li><li>قال زياد: <b>أعتذر عن خطئي يا عم، وأرجو أن تسامحني</b>، <b>فسامحه</b> الجار.</li></ul><p class="tip">التعامل الصحيح: التبسّم، وإلقاء السلام، والاعتراف بالخطأ. وغير الصحيح: الصراخ، وقرع الأبواب بقوة.</p>`},
+ {h:"النشيد: آداب الحديث", b:`<div class="ex">أدّبني الإسلامُ الأعظمْ * منْ هَدْيِ رسولي أتعلّمْ<br>لا أرفعُ صوتًا في المجلسْ * لا ألمزُ أحدًا أو أهمسْ<br>لستُ أقاطعُ منْ يتكلّمْ<br>أُحسنُ حينَ أقولُ كلامَا * لا مغتابًا أو نمّامَا<br>وإذا ما خاطبني جاهلْ * وأطالَ لسانًا بالباطلْ<br>أصبرُ ثمّ أقولُ: سلامَا</div><table class="mini"><tr><th>الكلمة</th><th>معناها</th></tr><tr><td>هَدْي</td><td>أقوال وأفعال</td></tr><tr><td>ألمِز</td><td>أعيب وأنتقص</td></tr><tr><td>مغتابًا</td><td>ذاكرًا صفات الناس السيئة في غيابهم</td></tr><tr><td>نمّامًا</td><td>ناقلًا للكلام بين الناس بقصد الإفساد</td></tr></table>`}
+],
+ex:[
+ {t:"sort", q:"صنّفي الأوصاف", bins:["أوصاف تعجبني","أوصاف لا تعجبني"], items:[["كريم",0],["مهذّب",0],["أمين",0],["صادق",0],["طمّاع",1],["كذّاب",1],["بخيل",1],["غشّاش",1]]},
+ {t:"match", q:"صِلي الكلمة بمعناها", pairs:[["هَدْي","أقوال وأفعال"],["ألمِز","أعيب وأنتقص"],["مغتابًا","يذكر عيوب الناس في غيابهم"],["نمّامًا","ينقل الكلام بين الناس ليفسد"]]},
+ {t:"mcq", q:"كان الشقيقان طارق وزياد يلعبان الكرة في:", o:["الشارع","فناء منزلهما"], a:1},
+ {t:"mcq", q:"قرع طارق الباب:", o:["بقوة","بلطف"], a:1},
+ {t:"mcq", q:"عاد زياد واعتذر للجار:", o:["فسامحه","فلم يسامحه"], a:0},
+ {t:"sort", q:"تعامل صحيح أم غير صحيح؟", bins:["صحيح ✓","غير صحيح ✗"], items:[["التبسّم في وجوه الآخرين",0],["إلقاء السلام",0],["الاعتراف بالخطأ",0],["الصراخ في وجوه الآخرين",1],["قرع الأبواب بقوة",1]]},
+ {t:"mcq", q:"اختاري أداة السؤال: (.......) خرج الجار غاضبًا؟", o:["كيف","لماذا"], a:1, why:"نسأل عن السبب بـ(لماذا)."},
+ {t:"mcq", q:"اختاري أداة السؤال: (.......) تعامل طارق مع الجار ليستعيد الكرة؟", o:["كيف","لماذا"], a:0, why:"نسأل عن الطريقة والحال بـ(كيف)."},
+ {t:"mcq", q:"في النشيد: إذا خاطبني جاهل وأطال لسانه:", o:["أصرخ عليه","أصبر ثم أقول: سلامًا","أبتعد وأبكي"], a:1},
+ {t:"mcq", hots:1, q:"لماذا سامح الجار زيادًا في النهاية؟", o:["لأنه خاف منه","لأن زيادًا اعترف بخطئه واعتذر","لأن الكرة كانت لطارق","لأنه لم يسمعه"], a:1}
+]},
+{id:"u1-adel", kind:"read", sect:"الدرس الأول: عادل في الطائرة", title:"قصة عادل في الطائرة", pages:"ص 22، 23",
+learn:[
+ {h:"اقرئي القصة بصوت عالٍ", story:true, b:`
+<p>دخلَ الوالدُ حاملًا في يدِه تذاكرَ السفرِ، فاستقبلتْهُ الأسرةُ بفرحٍ، وأسرعَ الجميعُ لتجهيزِ حقائبِهمُ الكبيرةِ استعدادًا للرحلةِ إلّا عادلًا، اكتفى بحقيبةٍ يدويّةٍ صغيرةٍ.</p>
+<p>وقبلَ موعدِ الرحلةِ وصلتِ الأسرةُ إلى المطارِ، واستقرَّ أفرادُها على المقاعدِ في صالةِ الانتظارِ كغيرِهمْ منَ المسافرينَ، غيرَ امرأةٍ كانتْ تحملُ طفلًا لمْ تجدْ مكانًا تجلسُ فيه.</p>
+<p>رآها عادلٌ فقامَ عنْ مقعدِه وأجلسَها، ووقفَ <span class="gl" data-m="يُطيل النظر">يتأمّلُ</span> المسافرينَ ويستمتعُ بحركتِهمْ حتّى سمعَ النداءَ لصعودِ الطائرةِ.</p>
+<p>صعدَ عادلٌ إلى الطائرةِ بهدوءٍ، ووجدَ المضيفَ في استقبالِه <span class="gl" data-m="دلّه، وضدها: أضلّ">فأرشدَهُ</span> إلى المقعدِ المخصَّصِ لهُ، جلسَ عادلٌ على مقعدِه، وربطَ حزامَ الأمانِ استعدادًا <span class="gl" data-m="انطلاق الطائرة وارتفاعها، وضدها: هبوط">لإقلاعِ</span> الطائرةِ، وأثناءَ ذلكَ استمعَ إلى تعليماتِ السلامةِ، وردّدَ معَ قائدِ الطائرةِ دعاءَ السفرِ.</p>
+<p>أخذَ عادلٌ يطالعُ مجلّةً للأطفالِ، وبينَما هوَ يقلّبُ صفحاتِ المجلّةِ سمعَ <span class="gl" data-m="صوتًا عاليًا مزعجًا، وضدها: هادئ">ضجيجًا</span>، فالتفتَ يمينًا وشمالًا فإذا أطفالٌ يركضونَ في ممرّاتِ الطائرةِ، ويعبثونَ بمحتوياتِها.</p>
+<p><span class="gl" data-m="تعجّب">دهشَ</span> عادلٌ منْ تصرُّفِهمْ، وقالَ: الطائرةُ ليستْ مكانًا للّعبِ يا أبي!</p>
+<p>ردَّ الأبُ: أحسنتَ يا عادلُ، فالطائرةُ وسيلةٌ للسفرِ، فهيَ تحملُ ركّابًا منْ أجناسٍ متنوّعةٍ وأديانٍ مختلفةٍ، ولا بُدَّ أنْ نريَهمْ صورةً <span class="gl" data-m="حسنة وجميلة">مشرِّفةً</span> للمسلمِ الذي يتحلّى بأخلاقِ الإسلامِ ويتمسّكُ بآدابِه، فقدْ قالَ الرسولُ ﷺ: «أكملُ المؤمنينَ إيمانًا أحسنُهمْ خلقًا».</p>`}
+],
+ex:[
+ {t:"mcq", q:"ما سبب فرح أسرة عادل؟", o:["شراء حقائب جديدة","دخول الوالد حاملًا تذاكر السفر","زيارة الجد","نجاح عادل"], a:1},
+ {t:"mcq", q:"ماذا اكتفى عادل أن يأخذ؟", o:["حقيبة كبيرة","حقيبة يدوية صغيرة","لا شيء"], a:1},
+ {t:"mcq", q:"ماذا فعل عادل للمرأة التي تحمل طفلًا؟", o:["تجاهلها","قام عن مقعده وأجلسها","نادى المضيف"], a:1}
+]},
+{id:"u1-adel-f", kind:"", sect:"الدرس الأول: عادل في الطائرة", title:"فهم القصة وكلماتها", pages:"ص 24 إلى 26، 32، 33",
+learn:[
+ {h:"أهم ما في القصة", b:`<ul><li><b>المضيف</b> أرشد عادلًا إلى مقعده، وربط <b>حزام الأمان</b> استعدادًا لإقلاع الطائرة، وردّد مع قائد الطائرة <b>دعاء السفر</b>.</li><li>أدهشه <b>أطفال يركضون في ممرات الطائرة ويعبثون بمحتوياتها</b>.</li><li>قال الأب: <b>الطائرة وسيلة للسفر</b>، ولا بد أن نُري الناس <b>صورة مشرّفة للمسلم</b>.</li></ul><table class="mini"><tr><th>التصرف</th><th>دلالته</th></tr><tr><td>قام عادل لتجلس المرأة</td><td>حسن الأدب</td></tr><tr><td>نفّذ تعليمات السلامة</td><td>التزام النظام</td></tr><tr><td>طالع المجلة</td><td>الثقافة وحب القراءة</td></tr><tr><td>ركض الأطفال في الممرات</td><td>سوء التصرف</td></tr></table>`},
+ {h:"الكلمات والأضداد", b:`<table class="mini"><tr><th>الكلمة</th><th>معناها</th><th>ضدها</th></tr><tr><td>يتأمّل</td><td>يطيل النظر</td><td></td></tr><tr><td>ضجيجًا</td><td>صوتًا عاليًا مزعجًا</td><td>هادئ</td></tr><tr><td>مشرّفة</td><td>حسنة وجميلة</td><td></td></tr><tr><td>إقلاع</td><td>انطلاق الطائرة وارتفاعها</td><td>هبوط</td></tr><tr><td>أرشد</td><td></td><td>أضلّ</td></tr><tr><td>حافظ</td><td></td><td>أهمل</td></tr><tr><td>استقبل</td><td></td><td>ودّع</td></tr></table><p class="tip">خريطة (أقلعت): ضدها هبطت · معناها انطلقت وارتفعت · نوعها فعل · مثال: أقلعت الطائرة في موعدها.</p><p>جملة الخط: «أكملُ المؤمنين إيمانًا أحسنُهم خُلُقًا».</p>`}
+],
+ex:[
+ {t:"mcq", q:"الذي أرشد عادلًا إلى مقعده هو:", o:["المهندس","المضيف","الوالد"], a:1},
+ {t:"mcq", q:"عندما استقر عادل في مقعده ربط:", o:["حزام الأمان","خيط الحذاء"], a:0},
+ {t:"mcq", q:"قال الأب لابنه عادل:", o:["الطائرة وسيلة للسفر","الطائرة مكان للعب"], a:0},
+ {t:"match", q:"صِلي التصرف بدلالته", pairs:[["قام عادل لتجلس المرأة","حسن الأدب"],["نفّذ تعليمات السلامة","التزام النظام"],["طالع المجلة","حب القراءة"],["ركض الأطفال في الممرات","سوء التصرف"]]},
+ {t:"match", q:"صِلي الكلمة بمعناها", pairs:[["يتأمّل","يطيل النظر"],["ضجيجًا","صوتًا عاليًا مزعجًا"],["مشرّفة","حسنة وجميلة"],["إقلاع","انطلاق الطائرة"]]},
+ {t:"match", q:"صِلي الكلمة بضدها", pairs:[["أرشد","أضلّ"],["حافظ","أهمل"],["استقبل","ودّع"],["إقلاع","هبوط"]]},
+ {t:"mcq", q:"ضد (ضجيج):", o:["مزعج","هادئ","حزين"], a:1},
+ {t:"mcq", q:"معنى (دهش):", o:["تعجّب","فرح","تساءل"], a:0},
+ {t:"mcq", q:"مفرد (مضيفين):", o:["ضيف","مضيف","ضيافة"], a:1},
+ {t:"order", q:"رتّبي ما فعله عادل في الطائرة", words:["صعد الطائرة بهدوء","جلس على مقعده","ربط حزام الأمان","استمع إلى تعليمات السلامة","ردّد دعاء السفر","طالع مجلة للأطفال"]},
+ {t:"mcq", hots:1, q:"«أحسنتَ يا عادل» تدل على أن الأب:", o:["غضب من عادل","أعجبه قول عادل","لم يسمع عادلًا"], a:1},
+ {t:"mcq", hots:1, q:"لماذا قال الأب: لا بد أن نريهم صورة مشرّفة للمسلم؟", o:["لأن الطائرة كبيرة","لأن فيها ركّابًا من أجناس وأديان مختلفة يرون أخلاقنا","لأن عادلًا صغير"], a:1},
+ {t:"write", q:"هل تفعلين مثل عادل مع المرأة؟ ولماذا؟", model:"نعم، أفعل مثله؛ لأن ذلك من حسن الخلق ومساعدة الآخرين والاقتداء بالرسول ﷺ."},
+ {t:"write", q:"لو كنتِ مكان عادل ورأيتِ الأطفال يركضون في الطائرة، كيف تتصرفين؟", model:"أنصحهم بلطف بالجلوس، أو أخبر والديّ أو المضيف، ولا أصرخ عليهم."}
+]},
+{id:"u1-adel-g", kind:"", sect:"الدرس الأول: عادل في الطائرة", title:"ال والتاء والمد وإلّا ويمين", pages:"ص 27 إلى 31",
+learn:[
+ {h:"ال الشمسية والقمرية", b:`<p><b>ال الشمسية:</b> تُكتب ولا تُنطق، والحرف بعدها مشدّد: السّفر، الرّحلة، الطّائرة، السّلامة.<br><b>ال القمرية:</b> تُكتب وتُنطق: الوالد، الأسرة، المطار، المقعد، الأمان.</p>`},
+ {h:"التاء والمد", b:`<p><b>تاء مربوطة (ة):</b> الطائرة، الرحلة، مجلة · <b>تاء مفتوحة (ت):</b> وصلت، كانت، ليست، الممرّات، محتويات</p><div class="ex">أستمتع بقراءة القصص المفيدة والمجلات المصوّرة.<br>الأطفال يركضون في الممرّات ويعبثون بمحتويات الطائرة.</div><p><b>مد بالألف</b> مثل عادل: صادق، كاتب · <b>بالواو</b> مثل صعود: هبوط، جلوس · <b>بالياء</b> مثل كبيرة: صغيرة، جميلة</p>`},
+ {h:"إلّا، ويمين وشمال", b:`<div class="ex">جهّز أفراد الأسرة حقائبهم الكبيرة <b>إلّا عادلًا</b>.<br>جلس المسافرون على المقاعد <b>إلّا امرأةً</b>.</div><p class="tip">بعد (إلّا) نضع تنوين فتح: عادلًا، امرأةً، طفلًا.</p><div class="ex">يقف فوّاز <b>يمينَ</b> المدرسة، وتقف الحافلة <b>شمالَ</b> المدرسة.<br>يسلّم المصلي <b>يمينًا</b> ثم <b>شمالًا</b>.</div><p>يمين وشمال: <b>ظرفا مكان</b>.</p>`}
+],
+ex:[
+ {t:"sort", q:"ال الشمسية أم القمرية؟", bins:["شمسية","قمرية"], items:[["السفر",0],["الرحلة",0],["الطائرة",0],["الوالد",1],["الأسرة",1],["المطار",1]]},
+ {t:"sort", q:"تاء مربوطة أم مفتوحة؟", bins:["تاء مربوطة","تاء مفتوحة"], items:[["مجلة",0],["الرحلة",0],["الطائرة",0],["وصلت",1],["كانت",1],["الممرات",1]]},
+ {t:"mcq", q:"أكملي بكلمة تنتهي بتاء مفتوحة: الأطفال يركضون في (.......)", o:["الممرّة","الممرّات"], a:1},
+ {t:"sort", q:"صنّفي حسب حرف المد", bins:["مد بالألف","مد بالواو","مد بالياء"], items:[["صادق",0],["كاتب",0],["هبوط",1],["جلوس",1],["صغيرة",2],["جميلة",2]]},
+ {t:"mcq", q:"أكملي: جلس المسافرون على المقاعد (.......)", o:["إلّا امرأة","إلّا امرأةً"], a:1, why:"بعد إلّا تنوين فتح."},
+ {t:"mcq", q:"أكملي: صعد المسافرون إلى الطائرة بهدوء (.......)", o:["إلّا طفلًا","إلّا طفلٌ"], a:0},
+ {t:"mcq", q:"بعد التشهد الأخير يسلّم المصلي (.......) ثم شمالًا.", o:["يمينًا","صباحًا","مساءً"], a:0},
+ {t:"mcq", q:"كلمتا (يمين) و(شمال):", o:["ظرفا زمان","ظرفا مكان","أداتا استثناء"], a:1},
+ {t:"write", q:"اكتبي جملة فيها (إلّا) عن أسرتك.", model:"حضر أفراد أسرتي إلّا أخي. (أي جملة صحيحة بعد إلّا تنوين فتح أو اسم منصوب)"}
+]},
+{id:"u1-adel-d", kind:"dict", sect:"الدرس الأول: عادل في الطائرة", title:"إملاء عادل في الطائرة", pages:"ص 29، 30، 52",
+learn:[{h:"انتبهي لهذه الكلمات", b:`<p class="tip">استقباله، استعدادًا (همزة وصل) · لإقلاع، أثناء (همزة قطع) · المخصَّص (ص) · ضجيجًا (ض) · ممرّات، محتوياتها (ت مفتوحة)</p>`}],
+ex:[
+ {t:"dict", kind:"إملاء منسوخ", text:"صَعِدَ عادِلٌ إِلى الطّائِرَةِ بِهُدوءٍ، وَوَجَدَ الْمُضيفَ في اسْتِقْبالِهِ فَأَرْشَدَهُ إِلى الْمَقْعَدِ الْمُخَصَّصِ لَهُ، جَلَسَ عادِلٌ عَلى مَقْعَدِهِ، وَرَبَطَ حِزامَ الْأَمانِ اسْتِعْدادًا لِإِقْلاعِ الطّائِرَةِ، وَأَثْناءَ ذلِكَ اسْتَمَعَ إِلى تَعْليماتِ السَّلامَةِ."},
+ {t:"dict", kind:"إملاء منظور", text:"أَخَذَ عادِلٌ يُطالِعُ مَجَلَّةً لِلْأَطْفالِ، وَبَيْنَما هُوَ يُقَلِّبُ صَفَحاتِ الْمَجَلَّةِ سَمِعَ ضَجيجًا، فَالْتَفَتَ يَمينًا وَشِمالًا فَإِذا أَطْفالٌ يَرْكُضونَ في مَمَرّاتِ الطّائِرَةِ، وَيَعْبَثونَ بِمُحْتَوَياتِها، دَهِشَ عادِلٌ مِنْ تَصَرُّفِهِمْ، وَقالَ: الطّائِرَةُ لَيْسَتْ مَكانًا لِلَّعِبِ يا أَبي!"},
+ {t:"dict", kind:"إملاء منسوخ (التقويم)", text:"قَبْلَ مَوْعِدِ الرِّحْلَةِ وَصَلَتِ الْأُسْرَةُ إِلى الْمَطارِ، وَاسْتَقَرَّ أَفْرادُها عَلى الْمَقاعِدِ في صالَةِ الِانْتِظارِ كَغَيْرِهِمْ مِنَ الْمُسافِرينَ، غَيْرَ امْرَأَةٍ كانَتْ تَحْمِلُ طِفْلًا لَمْ تَجِدْ مَكانًا تَجْلِسُ فيهِ."},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["ضجيجًا","ظجيجًا","دجيجًا"], a:0},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["إستقباله","استقباله"], a:1},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["المخصّص","المخسّس"], a:0},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["الانتظار","الإنتظار","الانتضار"], a:0}
+]},
+{id:"u1-year", kind:"read", sect:"الدرس الثاني: عام دراسي جديد", title:"قصة عام دراسي جديد", pages:"ص 34، 35",
+learn:[
+ {h:"اقرئي القصة بصوت عالٍ", story:true, b:`
+<p>معَ بدايةِ العامِ الدراسيِّ الجديدِ، وبعدَ أنِ اكتملَ تلاميذُ الصفِّ الثالثِ الابتدائيِّ في فصلِهمْ؛ طلبَ المعلّمُ منهُمْ أنْ يعرّفوا بأنفسِهمْ؛ كيْ يعرفَ كلُّ واحدٍ زميلَهُ.</p>
+<p>ثُمَّ قالَ لهمْ: ماذا يتمنّى كلُّ واحدٍ منكُمْ معَ بدايةِ العامِ الدراسيِّ؟</p>
+<p>قالَ أحمدُ: أتمنّى أنْ أكونَ منَ المتفوّقينَ في مدرستي، وأنْ <span class="gl" data-m="أُفرِح، وضدها: أُحزن">أُسعدَ</span> والديَّ بتفوّقي.</p>
+<p>المعلّمُ: لتكونَ متفوّقًا بينَ زملائكَ لا بُدَّ أنْ تقرأَ الدرسَ في اليومِ السابقِ؛ لتتابعَ شرحَ المعلّمِ <span class="gl" data-m="سهولة">بيُسرٍ</span>، وتوجِّهَ إليهِ الأسئلةَ التي تحتاجُ إلى إجاباتٍ عنها، وتراجعَ دروسَكَ دائمًا، عندَها ستكونُ <span class="gl" data-m="موضع اهتمام">محطَّ</span> أنظارِ زملائكَ وإعجابِهمْ، ويسعدُ بذلكَ والداكَ.</p>
+<p>قالَ عادلٌ ضاحكًا: كنتُ أتمنّى أنْ أنامَ اليومَ؛ فأنا مازلتُ متعبًا.</p>
+<p>المعلّمُ: منَ المشكلاتِ التي تواجهُ التلاميذَ الاستيقاظُ صباحًا للذهابِ إلى المدرسةِ، حيثُ يتمنَّوْنَ أنْ يناموا مدّةً أطولَ، وحلُّ هذهِ المشكلةِ سهلٌ للغايةِ؛ وهوَ أنْ تنامَ مساءً في وقتٍ مبكّرٍ؛ لتستيقظَ لصلاةِ الفجرِ، قبلَ موعدِ الدراسةِ بوقتٍ كافٍ.</p>
+<p>قالَ فوّازٌ: أتمنّى أنْ <span class="gl" data-m="تكثر وتعمّ">تسودَ</span> روحُ المحبّةِ بيني وبينَ زملائي؛ لتصبحَ المدرسةُ عامرةً بالحبِّ والتعاونِ.</p>
+<p>المعلّمُ: أحسنتَ يا فوّازُ، علينا أنْ نتجنّبَ <span class="gl" data-m="العداوات">المشاحناتِ</span> والخصامَ والخطأَ على الآخرينَ؛ لتسودَ المحبّةُ بينَ الجميعِ.</p>
+<p>يا أبنائي، ما أجملَ حسنَ الخلقِ، واحترامَ الآخرينَ في المدرسةِ والشارعِ وفي كلِّ مكانٍ! قالَ الرسولُ ﷺ: «إنَّ منْ <span class="gl" data-m="أفاضلكم">خيارِكمْ</span> أحسنَكمْ أخلاقًا».</p>`}
+],
+ex:[
+ {t:"mcq", q:"ماذا يتمنى أحمد؟", o:["أن ينام","أن يكون من المتفوقين","أن تسود المحبة"], a:1},
+ {t:"mcq", q:"ماذا كان يتمنى عادل؟", o:["أن ينام","أن يتفوق","أن يسافر"], a:0},
+ {t:"mcq", q:"ماذا يتمنى فوّاز؟", o:["أن تسود روح المحبة بينه وبين زملائه","أن ينام مبكرًا","أن يشتري كتابًا"], a:0}
+]},
+{id:"u1-year-f", kind:"", sect:"الدرس الثاني: عام دراسي جديد", title:"فهم القصة وكلماتها", pages:"ص 36، 37، 42، 43",
+learn:[
+ {h:"أهم ما في القصة", b:`<ul><li>طلب المعلم أن يعرّفوا بأنفسهم <b>كي يعرف كل واحد زميله</b>، ثم سألهم عن <b>أمنياتهم</b>.</li><li><b>طريق التفوق:</b> أقرأ الدرس في اليوم السابق، وأتابع شرح المعلم، وأسأل، وأراجع دروسي دائمًا.</li><li><b>مشكلة عادل:</b> صعوبة الاستيقاظ صباحًا. <b>الحل:</b> النوم مساءً في وقت مبكر لأستيقظ لصلاة الفجر.</li><li><b>كيف تسود المحبة؟</b> بتجنّب المشاحنات والخصام والخطأ على الآخرين.</li><li>أفضل الناس: <b>أحسنهم أخلاقًا</b>.</li></ul>`},
+ {h:"الكلمات", b:`<table class="mini"><tr><th>الكلمة</th><th>معناها</th></tr><tr><td>يُسر</td><td>سهولة</td></tr><tr><td>تسود</td><td>تكثر وتعمّ</td></tr><tr><td>المشاحنات</td><td>العداوات</td></tr><tr><td>خياركم</td><td>أفاضلكم</td></tr><tr><td>محطّ أنظار</td><td>موضع اهتمام</td></tr></table><p class="tip">خريطة (أُسعِد): ضدها أُحزِن · مرادفها أُفرِح · نوعها فعل · مثال: أُسعِد والديّ بتفوقي.</p><div class="ex">حللتُ المسألة <b>بيُسرٍ</b> · إذا لم نلتزم الهدوء <b>تعمّ</b> الفوضى · المملكة <b>محطّ أنظار</b> العالم الإسلامي</div><p>جملة الخط: «إنَّ من خيارِكم أحسنَكم أخلاقًا».</p>`}
+],
+ex:[
+ {t:"mcq", q:"طلب المعلم أن يعرّفوا بأنفسهم:", o:["كي يسجّل أسماءهم","كي يعرف كل واحد زميله"], a:1},
+ {t:"mcq", q:"بعد أن عرّفوا بأنفسهم طلب منهم:", o:["أن يذكر كل واحد أمنيته","أن يفتحوا كتبهم"], a:0},
+ {t:"mcq", q:"ما حل مشكلة الاستيقاظ صباحًا؟", o:["النوم في الفصل","النوم مساءً في وقت مبكر","السهر"], a:1},
+ {t:"mcq", q:"كيف تسود المحبة في المدرسة؟", o:["بتجنّب المشاحنات والخصام","بكثرة اللعب","بالصمت"], a:0},
+ {t:"match", q:"صِلي الكلمة بمعناها", pairs:[["يُسر","سهولة"],["تسود","تكثر وتعمّ"],["المشاحنات","العداوات"],["خياركم","أفاضلكم"]]},
+ {t:"mcq", q:"أكملي: حللتُ المسألة (.......)؛ لأنني استذكرت دروسي.", o:["بيُسرٍ","تعمّ","محطّ أنظار"], a:0},
+ {t:"mcq", q:"أكملي: المملكة العربية السعودية (.......) العالم الإسلامي.", o:["بيُسر","محطّ أنظار","تعمّ"], a:1},
+ {t:"mcq", q:"ضد (أُسعِد):", o:["أُفرِح","أُحزِن"], a:1},
+ {t:"mcq", hots:1, q:"ماذا يحدث لو لم تكن هناك محبة وتسامح بين الناس؟", o:["تكثر المشاحنات ويتفرق الناس","يزيد التعاون","لا يتغير شيء"], a:0},
+ {t:"mcq", hots:1, q:"ما العلاقة بين النوم المبكر والتفوق؟", o:["لا علاقة","النوم المبكر يجعلني نشيطة فأفهم الشرح","النوم المبكر يضيّع الوقت"], a:1},
+ {t:"write", q:"اذكري أسبابًا لمشكلة صعوبة الاستيقاظ، واقترحي حلًّا آخر.", model:"الأسباب: السهر، واستعمال الأجهزة ليلًا. الحل: استخدام المنبّه، وتجهيز الحقيبة مساءً، وترك الأجهزة قبل النوم."},
+ {t:"write", q:"ضعي خطة من 3 خطوات بعنوان (أدرس وأستمتع).", model:"1. أقرأ الدرس قبل شرحه. 2. أراجع كل يوم وقتًا قصيرًا. 3. أكافئ نفسي بعد أن أنجز. (أي خطة مناسبة)"}
+]},
+{id:"u1-year-g", kind:"", sect:"الدرس الثاني: عام دراسي جديد", title:"الهمزات والشدة وغير وصباحًا", pages:"ص 38 إلى 41، 49 إلى 51",
+learn:[
+ {h:"همزة الوصل والقطع والشدة", b:`<p><b>همزة الوصل:</b> تُكتب ولا تُنطق عند الوصل: اكتمل، الابتدائي، الاستيقاظ.<br><b>همزة القطع:</b> تُكتب وتُنطق: أحمد، أكون، أتمنى، أُسعد، أبنائي، إجابات.</p><p><b>الحرف المضعّف:</b> المعلّم، يعرّفوا، كلّ.</p><p class="tip">إذا وقفنا على التاء المربوطة نطقناها هاءً: المدرسهْ. والهاء في آخر الكلمة مثل: زميلَه، وجه، هذه.</p>`},
+ {h:"الاستثناء بـ(غير)، وصباحًا ومساءً", b:`<div class="ex">لوّن الرسام الغزالَ <b>غيرَ الرأسِ</b>.<br>رسم الرسام السيارةَ <b>غيرَ الإطاراتِ</b>.<br>حضر التلاميذُ <b>غيرَ تلميذٍ</b>.</div><p class="tip">بعد (غير) نضع كسرة أو تنوين كسر.</p><div class="ex">تخرج الطيور من أعشاشها <b>صباحًا</b>، وتعود إليها <b>مساءً</b>.</div><p>صباحًا ومساءً: <b>ظرفا زمان</b>.</p><p><b>الواو والفاء وثم:</b> صعد عادل بهدوء <b>ف</b>جلس على مقعده <b>و</b>ربط الحزام <b>ثم</b> استمع إلى تعليمات السلامة.</p>`}
+],
+ex:[
+ {t:"sort", q:"همزة وصل أم قطع؟", bins:["همزة وصل","همزة قطع"], items:[["اكتمل",0],["الابتدائي",0],["الاستيقاظ",0],["أحمد",1],["أتمنى",1],["إجابات",1]]},
+ {t:"mcq", q:"أيّ كلمة فيها حرف مضعّف؟", o:["المعلّم","المعلم بلا شدة","معلم"], a:0},
+ {t:"mcq", q:"أكملي: حضر التلاميذ (.......)", o:["غيرَ تلميذٍ","غيرَ تلميذًا"], a:0},
+ {t:"mcq", q:"أكملي: رسم الرسام السيارة (.......)", o:["غيرَ الإطاراتِ","إلّا الإطاراتُ"], a:0},
+ {t:"mcq", q:"كلمة (صباحًا):", o:["ظرف زمان","ظرف مكان","أداة استثناء"], a:0},
+ {t:"mcq", q:"كلمة (التلاميذ):", o:["مفرد","مثنى","جمع"], a:2},
+ {t:"mcq", q:"أكملي بالحرف: الاستيقا...", o:["ذ","ظ","ض"], a:1},
+ {t:"sort", q:"أكملي آخر الكلمة: ة أم ت أم ه؟", bins:["ة","ت","ه"], items:[["كر..",0],["مشرقـ..",0],["درّاجـ..",0],["مسلما..",1],["هذ..",2],["وجـ..",2]]},
+ {t:"order", q:"رتّبي الكلمات", words:["أستيقظ","صباحًا","للذهاب","إلى","المدرسة."]},
+ {t:"mcq", q:"اربطي: صعد عادل بهدوء (...) جلس على مقعده (...) ربط الحزام (...) استمع إلى تعليمات السلامة", o:["فـ / و / ثم","ثم / ثم / و"], a:0},
+ {t:"mcq", q:"جمع (المسافر):", o:["المسافرون","المسافرة","السفر"], a:0},
+ {t:"mcq", q:"مرادف (أقبلت):", o:["جاءت","ذهبت","نامت"], a:0}
+]},
+{id:"u1-year-d", kind:"dict", sect:"الدرس الثاني: عام دراسي جديد", title:"إملاء عام دراسي جديد", pages:"ص 40، 52",
+learn:[{h:"انتبهي لهذه الكلمات", b:`<p class="tip">المشكلات، المشاحنات (ت مفتوحة) · الاستيقاظ (ظ) · مدّة، للغاية (ة) · مساءً · زملائي، زملائك (ئ) · بيُسرٍ</p>`}],
+ex:[
+ {t:"dict", kind:"إملاء منسوخ", text:"مِنَ الْمُشْكِلاتِ الَّتي تُواجِهُ التَّلاميذَ الاسْتيقاظُ صَباحًا لِلذَّهابِ إِلى الْمَدْرَسَةِ، حَيْثُ يَتَمَنَّوْنَ أَنْ يَناموا مُدَّةً أَطْوَلَ، وَحَلُّ هذِهِ الْمُشْكِلَةِ سَهْلٌ لِلْغايَةِ؛ وَهُوَ أَنْ تَناموا مَساءً في وَقْتٍ مُبَكِّرٍ؛ لِتَسْتَيْقِظوا لِصَلاةِ الْفَجْرِ، قَبْلَ مَوْعِدِ الدِّراسَةِ بِوَقْتٍ كافٍ."},
+ {t:"dict", kind:"إملاء منظور", text:"قالَ فَوّازٌ: أَتَمَنّى أَنْ تَسودَ روحُ الْمَحَبَّةِ بَيْني وَبَيْنَ زُمَلائي؛ لِتُصْبِحَ الْمَدْرَسَةُ عامِرَةً بِالْحُبِّ وَالتَّعاوُنِ. الْمُعَلِّمُ: أَحْسَنْتَ يا فَوّازُ، عَلَيْنا أَنْ نَتَجَنَّبَ الْمُشاحَناتِ وَالْخِصامَ وَالْخَطَأَ عَلى الْآخَرينَ؛ لِتَسودَ الْمَحَبَّةُ بَيْنَ الْجَميعِ."},
+ {t:"dict", kind:"إملاء منظور (التقويم)", text:"لِتَكونَ مُتَفَوِّقًا بَيْنَ زُمَلائِكَ لا بُدَّ أَنْ تَقْرَأَ الدَّرْسَ في الْيَوْمِ السّابِقِ؛ لِتُتابِعَ شَرْحَ الْمُعَلِّمِ بِيُسْرٍ، وَتُوَجِّهَ إِلَيْهِ الْأَسْئِلَةَ الَّتي تَحْتاجُ إِلى إِجاباتٍ عَنْها، وَتُراجِعَ دُروسَكَ بِشَكْلٍ دائِمٍ."},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["المشكلاة","المشكلات"], a:1},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["مساءً","مساءًا"], a:0, why:"لا نزيد ألفًا بعد الهمزة المسبوقة بألف."},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["زملائي","زملاءي","زملأي"], a:0}
+]},
+{id:"u1-boss", kind:"boss", sect:"التحدي الكبير", title:"تحدي: النحل والنسر", pages:"نموذج الاختبار ص 44 إلى 47",
+learn:[{h:"نص نموذج الاختبار (1) من الكتاب", b:`<div class="ex">في صباحِ يومٍ ربيعيٍّ، كانتِ النحلتانِ جميلةُ وزينةُ تتنقّلانِ بينَ الزهورِ البيضاءِ والحمراءِ والصفراءِ؛ لجمعِ الرحيقِ منها لتصنعا منهُ العسلَ، وعندما اقتربتا منْ شجرةِ سِدْرٍ سمعتا صوتًا مخيفًا يقولُ: ما هذا الطنينُ المزعجُ؟ ابتعدتا قليلًا، فإذا نسرٌ كبيرٌ ينظرُ إليهما بحدّةٍ ويتوعّدُ: إيّاكما أنْ تعودا إلى هذهِ الشجرةِ، فهيَ لي، وأتربّصُ فيها بفرائسي؛ لأنقضَّ عليها بمخالبي.<br>عادتِ النحلتانِ إلى خليّتِهما خائفتيْنِ، وأخبرتا الملكةَ بما حدثَ، صمتتِ الملكةُ وأخذتْ تفكّرُ، وجمعتِ النحلَ؛ لمناقشةِ هذهِ القضيّةِ، وإيجادِ حلٍّ لها. رأى بعضُ النحلِ أنْ تأذنَ للجميعِ بتركِ الخليّةِ ومغادرةِ الغابةِ، وقُلْنَ: النسرُ قويٌّ، وحجمُنا صغيرٌ. أمّا الفريقُ الآخرُ فقدْ رفضَ، وقُلْنَ: نحنُ قويّاتٌ باتّحادِنا وتعاونِنا، والغابةُ مُلْكٌ للجميعِ. وبعدَ مناقشاتٍ طويلةٍ اتّفقْنَ على أنْ ينتظمْنَ في صفوفٍ متراصّةٍ، وينطلقْنَ نحوَ الغابةِ؛ لمواجهةِ النسرِ.</div>`}],
+passage:"في صباح يوم ربيعي كانت النحلتان جميلة وزينة تتنقلان بين الزهور البيضاء والحمراء والصفراء لجمع الرحيق، فسمعتا عند شجرة سدر نسرًا يتوعدهما. عادتا خائفتين وأخبرتا الملكة، فصمتت وفكرت وجمعت النحل. رأى فريق ترك الغابة، وقال الآخر: نحن قويات باتحادنا وتعاوننا. ثم انطلق النحل في صفوف متراصة لمواجهة النسر.",
+ex:[
+ {t:"mcq", p:1, q:"أحداث القصة كانت في:", o:["مساء يوم صيفي","مساء يوم ربيعي","صباح يوم شتوي","صباح يوم ربيعي"], a:3},
+ {t:"mcq", p:1, q:"اسم صوت طيران النحل:", o:["طنين","أزيز","غوغاء","صرير"], a:0},
+ {t:"mcq", p:1, q:"لون ورود لم يُذكر في النص:", o:["أحمر","أصفر","أخضر","أبيض"], a:2},
+ {t:"mcq", p:1, q:"الشجرة المذكورة في النص:", o:["الطلح","السدر","الأثل","السرو"], a:1},
+ {t:"mcq", p:1, hots:1, q:"خروج جميع النحل بعد المناقشة يدل على أنهن وافقن على:", o:["مغادرة الغابة","التعاون ومواجهة النسر","البقاء دون مواجهة","جمع الرحيق"], a:1},
+ {t:"mcq", p:1, hots:1, q:"(صمتت الملكة وأخذت تفكّر)، حال الملكة:", o:["الحيرة","الغضب","الدهشة","الحزن"], a:0},
+ {t:"order", q:"رتّبي أحداث القصة", words:["خرجت النحلتان وقابلتا النسر","توعّد النسر النحلتين","جمعت الملكة النحل","انطلق النحل لمواجهة النسر"]},
+ {t:"mcq", p:1, hots:1, q:"كيف اتضح أن الملكة اهتمت بأمر النسر؟", o:["صمتت وفكرت وجمعت النحل للمناقشة","نامت","هربت من الخلية"], a:0},
+ {t:"mcq", p:1, hots:1, q:"ما العلاقة بين غضب النسر وخروج النحل متراصّات؟", o:["لا علاقة","الغضب سبب، والخروج نتيجة","الخروج سبب، والغضب نتيجة"], a:1},
+ {t:"write", q:"قارني بين رأي الفريق الأول من النحل والفريق الآخر، وأيهما تفضّلين؟ ولماذا؟", model:"الأول: ترك الغابة لأن النسر قوي وحجمهن صغير. الآخر: البقاء لأنهن قويات باتحادهن والغابة ملك للجميع. أفضّل رأي الفريق الآخر؛ لأن الاتحاد قوة."},
+ {t:"write", q:"فسّري أثر مقولة (نحن قويات باتحادنا وتعاوننا) على أبناء الوطن.", model:"إذا اتحد أبناء الوطن وتعاونوا صاروا أقوياء، واستطاعوا مواجهة الصعاب وحماية وطنهم."},
+ {t:"write", q:"ماذا سيحدث لو لم تخبر النحلتان الملكة؟", model:"قد يهاجم النسر النحل، ولن يجدوا حلًّا للمشكلة."},
+ {t:"write", q:"اقترحي خاتمة للقصة.", model:"هاجم النحل النسر متحدات فلسعنه حتى هرب وترك الشجرة، وعاش النحل في الغابة بأمان."}
+]}
+];
+
+/* ================= الوحدة الثانية: ربوع من بلادي (ص 53 إلى 92) ================= */
+const U2 = [
+{id:"u2-start", kind:"word", sect:"البداية", title:"مدن بلادي والاستماع والنشيد", pages:"ص 55 إلى 61",
+learn:[
+ {h:"مدن ومعالم", b:`<p>من مدن المملكة: <b>أبها، الرياض، مكة، جدة، عرعر، الخبر، الدمام</b>.</p><ul><li>الكعبة المشرفة في <b>مكة المكرمة</b>.</li><li>المسجد النبوي الشريف في <b>المدينة المنورة</b>.</li><li>عاصمة المملكة: <b>الرياض</b>.</li><li>نافورة الملك فهد في <b>جدة</b>، ويكثر النخل في <b>القصيم</b>.</li></ul><p class="tip">نص الاستماع (من معالم بلادي): نورة جمعت المعلومات من الكتب والمجلات وشبكة الإنترنت، وسارة عرضت الصور مستخدمة شاشة الحاسوب.</p>`},
+ {h:"النشيد: يا بلادي", b:`<div class="ex">يا بلادي أنتِ عندي * مِن لَدُنْ ربّي هديّة<br>فيكِ بيتُ اللهِ تهفو * نحوَه النفسُ الزكيّة<br>فيكِ روضاتٌ حِسانٌ * وبساتينُ بهيّة<br>وطيورٌ شادياتٌ * بأغانيها الشجيّة</div><table class="mini"><tr><th>الكلمة</th><th>معناها</th></tr><tr><td>لَدُنْ</td><td>عِنْد</td></tr><tr><td>تهفو</td><td>تميل وتشتاق</td></tr><tr><td>بهيّة</td><td>جميلة</td></tr><tr><td>الشجيّة</td><td>الرقيقة الناعمة</td></tr></table>`}
+],
+ex:[
+ {t:"match", q:"صِلي المعلم بمدينته", pairs:[["الكعبة المشرفة","مكة المكرمة"],["المسجد النبوي","المدينة المنورة"],["نافورة الملك فهد","جدة"],["عاصمة المملكة","الرياض"]]},
+ {t:"mcq", q:"يكثر النخل في:", o:["مكة المكرمة","القصيم"], a:1},
+ {t:"match", q:"صِلي الكلمة بمعناها", pairs:[["لَدُنْ","عِنْد"],["تهفو","تميل وتشتاق"],["بهيّة","جميلة"],["الشجيّة","الرقيقة الناعمة"]]},
+ {t:"mcq", q:"اختاري أداة السؤال: (.......) عرضت سارة الصور؟", o:["كيف","لماذا"], a:0},
+ {t:"mcq", q:"اختاري أداة السؤال: (.......) يركب المصطافون العربات المعلقة؟", o:["لماذا","كيف"], a:0},
+ {t:"mcq", q:"جمعت نورة المعلومات من:", o:["الكتب والمجلات وشبكة الإنترنت","التلفاز فقط"], a:0},
+ {t:"mcq", hots:1, q:"(فيكِ بيتُ الله) يقصد الشاعر:", o:["الكعبة المشرفة","بيت الشاعر","المدرسة"], a:0}
+]},
+{id:"u2-riyadh", kind:"read", sect:"الدرس الأول: الرياض والملك الشجاع", title:"قصة الرياض والملك الشجاع", pages:"ص 62، 63",
+learn:[
+ {h:"اقرئي النص بصوت عالٍ", story:true, b:`
+<p>زارتْ نورةُ مع أسرتِها مدينةَ الرياضِ، وفي الطريقِ قالتِ الأمُّ: سأحدّثُكم عن موحّدِ مملكتِنا الحبيبةِ المملكةِ العربيةِ السعوديةِ، وبطلِ الرياضِ الذي استردَّها، ووحّدَ البلادَ تحتَ رايةِ التوحيدِ، إنّه الملكُ عبدُالعزيزِ آلُ سعودٍ رحمه الله، الملكُ الشجاعُ والقائدُ الذكيُّ الذي كافحَ حتى استردَّ مُلكَ آبائِه وأجدادِه، وكانَ همُّه رفعةَ المملكةِ ونشرَ <span class="gl" data-m="سعة العيش">الرخاءِ</span> والأمنِ في ربوعِها. لقد كانَ فرحُ الناسِ عظيمًا عندما استردَّ الأميرُ الشابُّ الرياضَ، وسمعوا أحدَ رجالِ الملكِ يقولُ: الحكمُ للهِ، ثمّ لعبدِالعزيزِ بنِ عبدِالرحمنِ.</p>
+<p>قالَ فوّازٌ: إنّه الملكُ العادلُ، الذي أحبَّ شعبَه وأحبّوه.</p>
+<p>قالتْ نورةُ: أنا سعيدةٌ؛ لأنّني سأزورُ مدينةَ الملكِ الشجاعِ، ثمّ سألتْ نورةُ أباها: لماذا سُمّيتِ الرياضُ بهذا الاسمِ يا أبي؟</p>
+<p>قالَ الأبُ: سُمّيتِ الرياضُ بهذا الاسمِ؛ لأنّها كانتْ رياضًا خضراءَ، كثيرةَ البساتينِ والحدائقِ <span class="gl" data-m="كثيرة الشجر والطيور">الغنّاءِ</span>، وسطَ الصحراءِ <span class="gl" data-m="التي لا ماء فيها">القاحلةِ</span>، وما زالتِ الرياضُ رياضًا خضراءَ بحدائقِها التي تنتشرُ في كلِّ مكانٍ.</p>
+<p>والرياضُ عاصمةُ مملكتِنا الغاليةِ المملكةِ العربيةِ السعوديةِ، وأكبرُ مدنِها، ففيها مقرُّ الحكمِ والوزاراتُ والسفاراتُ، ويوجدُ فيها بناياتٌ <span class="gl" data-m="مرتفعة جدًّا، وضدها: منخفضة">شاهقةٌ</span>، أحياؤُها متعدّدةٌ وشوارعُها واسعةٌ، وفيها شبكةٌ من الجسورِ والأنفاقِ، وفي الرياضِ كثيرٌ من المعالمِ التاريخيّةِ، كحصنِ المصمكِ وآثارِ الدرعيّةِ التاريخيّةِ والمتحفِ الوطنيِّ، وجبلِ أبي غاربٍ، وهو المكانُ الذي حطَّ الملكُ عبدُالعزيزِ رحالَه فيه ليلةَ استردادِ الرياضِ، وقد أُقيمتْ عليه حديقةُ المُناخِ.</p>`}
+],
+ex:[
+ {t:"mcq", q:"مَن موحّد المملكة العربية السعودية؟", o:["الملك عبدالعزيز آل سعود","فوّاز","والد نورة"], a:0},
+ {t:"mcq", q:"لماذا سُمّيت الرياض بهذا الاسم؟", o:["لأنها كبيرة","لأنها كانت رياضًا خضراء","لأن فيها جسورًا"], a:1},
+ {t:"mcq", q:"ما الذي أُقيم على جبل أبي غارب؟", o:["حديقة المناخ","حديقة الوطن","المتحف الوطني"], a:0}
+]},
+{id:"u2-riyadh-f", kind:"", sect:"الدرس الأول: الرياض والملك الشجاع", title:"فهم النص وكلماته", pages:"ص 64، 65، 70، 71",
+learn:[
+ {h:"أهم ما في النص", b:`<ul><li>قال أحد رجال الملك عند استرداد الرياض: <b>«الحكم لله، ثم لعبدالعزيز بن عبدالرحمن»</b>.</li><li>يحبه الشعب لأنه <b>الملك العادل</b> الذي أحب شعبه، ووحّد البلاد ونشر الرخاء والأمن.</li><li>الرياض <b>عاصمة</b> المملكة لأن فيها <b>مقر الحكم والوزارات والسفارات</b>، وهي <b>أكبر</b> مدن المملكة.</li><li>من معالمها: <b>حصن (قصر) المصمك</b>، آثار الدرعية، المتحف الوطني، جبل أبي غارب وعليه حديقة المناخ.</li></ul><p>جملة الخط: «الرياضُ عاصمةُ المملكةِ العربيةِ السعوديةِ».</p>`},
+ {h:"الكلمات", b:`<table class="mini"><tr><th>الكلمة</th><th>معناها</th></tr><tr><td>الغنّاء</td><td>كثيرة الشجر والطيور</td></tr><tr><td>التراثية</td><td>القديمة</td></tr><tr><td>الرخاء</td><td>سعة العيش</td></tr><tr><td>القاحلة</td><td>التي لا ماء فيها</td></tr></table><p>ضد <b>حزن</b>: فرح · مفرد <b>حصون</b>: حصن · مذكر <b>وطنية</b>: الوطني · مفرد <b>شوارع</b>: شارع · مذكر <b>كثيرة</b>: كثير</p><p class="tip">خريطة (شاهقة): معناها مرتفعة جدًّا · ضدها منخفضة · نوعها اسم · مثال: في الرياض بنايات شاهقة.</p>`}
+],
+ex:[
+ {t:"mcq", q:"من المعالم الأثرية في الرياض:", o:["قصر المصمك","قصر شبرا"], a:0},
+ {t:"mcq", q:"الرياض مدينة من:", o:["أصغر مدن المملكة","أكبر مدن المملكة"], a:1},
+ {t:"mcq", q:"الرياض عاصمة المملكة لأن فيها:", o:["البساتين والحدائق","مقر الحكم والوزارات والسفارات"], a:1},
+ {t:"mcq", q:"ماذا فعل الملك عبدالعزيز في جبل أبي غارب؟", o:["حطّ رحاله فيه ليلة استرداد الرياض","بنى فيه قصرًا"], a:0},
+ {t:"match", q:"صِلي الكلمة بمعناها", pairs:[["الغنّاء","كثيرة الشجر والطيور"],["التراثية","القديمة"],["الرخاء","سعة العيش"],["القاحلة","التي لا ماء فيها"]]},
+ {t:"mcq", q:"ضد (شاهقة):", o:["مرتفعة","منخفضة"], a:1},
+ {t:"mcq", q:"مفرد (حصون):", o:["حصن","حصان"], a:0},
+ {t:"mcq", q:"مذكر (وطنية):", o:["الوطني","الوطن"], a:0},
+ {t:"order", q:"رتّبي لتكوين جملة عن الرياض", words:["الرياض","عاصمة","المملكة","العربية","السعودية","وأكبر","مدنها."]},
+ {t:"mcq", hots:1, q:"(الحكم لله، ثم لعبدالعزيز) تقديم اسم الله يدل على:", o:["أن الحكم لله أولًا والملك يحكم بشرعه","أن الملك نسي","لا يدل على شيء"], a:0},
+ {t:"mcq", hots:1, q:"(أنا سعيدة لأنني سأزور مدينة الملك الشجاع) يدل على:", o:["حب نورة لوطنها وملكها","خوف نورة","تعب نورة"], a:0},
+ {t:"write", q:"قارني بين الرياض في الماضي والرياض اليوم.", model:"في الماضي: رياض خضراء وسط الصحراء القاحلة. اليوم: عاصمة فيها بنايات شاهقة وجسور وأنفاق، وما زالت خضراء بحدائقها."},
+ {t:"write", q:"اقترحي عنوانًا آخر للنص.", model:"موحّد المملكة (أو: عاصمة بلادي، أو: الرياض الخضراء)."}
+]},
+{id:"u2-riyadh-g", kind:"", sect:"الدرس الأول: الرياض والملك الشجاع", title:"ال والتاء والألف والتفضيل", pages:"ص 66 إلى 69",
+learn:[
+ {h:"ال الشمسية والقمرية والتنوين", b:`<p><b>الشمسية:</b> الرّياض، الصّحراء، الطّريق، الشّاب، النّاس<br><b>القمرية:</b> المملكة، الحكم، الوزارات، الجسور، الأنفاق</p><p class="tip">الاسم المبدوء بـ(ال) لا يقبل التنوين: رياضًا ← الرياض.</p>`},
+ {h:"التاء والألف", b:`<div class="ex">أحياء الرياض (متعددةٌ) وشوارعها (واسعةٌ) وفيها (شبكةٌ) من الجسور ← تاء مربوطة<br>في الرياض مقر الحكم و(الوزارات) و(السفارات) و(بنايات) شاهقة ← تاء مفتوحة</div><p><b>ألف على صورة الياء (ى)</b> مثل مضى: على، حتى، إلى، مشى<br><b>ألف ممدودة (اء)</b> مثل غنّاء: خضراء، الصحراء، الرخاء، أحياء</p>`},
+ {h:"التفضيل، والمضارع والماضي", b:`<div class="ex">هذه نخلة طويلة ← هذه نخلة <b>أطول</b><br>هذا طريق واسع ← هذا طريق <b>أوسع</b><br>هذه سيارة سريعة ← هذه سيارة <b>أسرع</b></div><table class="mini"><tr><th>المضارع</th><th>الماضي</th></tr><tr><td>تزورُ</td><td>زارتْ</td></tr><tr><td>يزورُ</td><td>زارَ</td></tr><tr><td>تقعُ</td><td>وقعتْ</td></tr><tr><td>يفتحُ</td><td>فتحَ</td></tr></table>`}
+],
+ex:[
+ {t:"sort", q:"ال الشمسية أم القمرية؟", bins:["شمسية","قمرية"], items:[["الرياض",0],["الصحراء",0],["الطريق",0],["المملكة",1],["الحكم",1],["الجسور",1]]},
+ {t:"mcq", q:"الكتابة الصحيحة:", o:["الرياضًا","الرياض"], a:1, why:"المبدوء بـ ال لا يقبل التنوين."},
+ {t:"sort", q:"صنّفي آخر الكلمة", bins:["ألف على صورة الياء (ى)","ألف ممدودة (اء)"], items:[["مضى",0],["على",0],["مشى",0],["خضراء",1],["الصحراء",1],["الرخاء",1]]},
+ {t:"mcq", q:"هذا طريق واسع ← هذا طريق (.......)", o:["أوسع","واسعة","وسيع"], a:0},
+ {t:"mcq", q:"هذه سيارة سريعة ← هذه سيارة (.......)", o:["سرعة","أسرع"], a:1},
+ {t:"mcq", q:"الماضي من (تقعُ):", o:["وقعتْ","يقعُ","قعْ"], a:0},
+ {t:"mcq", q:"الماضي من (يفتحُ):", o:["فتحَ","افتحْ"], a:0},
+ {t:"mcq", q:"أكملي بتاء مفتوحة: في الرياض مقر الحكم و(.......)", o:["الوزارة","الوزارات"], a:1},
+ {t:"write", q:"اكتبي جملة فيها كلمة على وزن (أفعل) عن مدينتك.", model:"الرياض أكبر مدن المملكة. (أي جملة فيها أفعل: أكبر، أجمل، أطول...)"}
+]},
+{id:"u2-riyadh-d", kind:"dict", sect:"الدرس الأول: الرياض والملك الشجاع", title:"إملاء الرياض", pages:"ص 68، 91",
+learn:[{h:"انتبهي لهذه الكلمات", b:`<p class="tip">خضراءَ، الصحراءِ، الغنّاء (اء) · رياضًا (تنوين فتح) · القاحلة (ح، ة) · استردّ (همزة وصل) · أحبّوه (هاء)</p>`}],
+ex:[
+ {t:"dict", kind:"إملاء منسوخ", text:"زارَتْ نورةُ مع أسرتِها مدينةَ الرياضِ، وفي الطريقِ سألَتْ أباها: لِمَ سُمّيَتْ مدينةُ الرياضِ بهذا الاسمِ يا أبي؟ قالَ الأبُ: سُمّيَتِ الرياضُ بهذا الاسمِ؛ لأنّها كانَتْ رياضًا خضراءَ، كثيرةَ البساتينِ والحدائقِ الغنّاءِ، وسطَ الصحراءِ القاحلةِ."},
+ {t:"dict", kind:"إملاء منظور", text:"لقد كانَ فرحُ الناسِ عظيمًا عندما استردَّ الأميرُ الشابُّ الرياضَ، وسمعوا أحدَ رجالِ الملكِ يقولُ: الحكمُ للهِ، ثمّ لعبدِالعزيزِ بنِ عبدِالرحمنِ. قالَ فوّازٌ: إنّه الملكُ العادلُ، الذي أحبَّ شعبَه وأحبّوه."},
+ {t:"dict", kind:"إملاء منسوخ (التقويم)", text:"قالتِ الأمُّ: سأحدّثُكم عن موحّدِ المملكةِ العربيّةِ السعوديّةِ الذي وحّدَ البلادَ تحتَ رايةِ التوحيدِ، إنّه الملكُ عبدُالعزيزِ آلُ سعودٍ رحمه الله."},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["الصحراء","الصحرى","الصحرا"], a:0},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["القاحلة","القاهلة"], a:0},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["إستردّ","استردّ"], a:1}
+]},
+{id:"u2-masayef", kind:"read", sect:"الدرس الثاني: مصايفنا", title:"قصة مصايفنا", pages:"ص 72، 73",
+learn:[
+ {h:"اقرئي النص بصوت عالٍ", story:true, b:`
+<p>طلبَ المعلّمُ من التلاميذِ التحدّثَ إلى زملائِهم عن المصايفِ الجبليّةِ في المملكةِ العربيّةِ السعوديّةِ.</p>
+<p>بدأَ مهنّدٌ الحديثَ قائلًا: من المدنِ التي زرتُها وأعجبَتْني محافظةُ الطائفِ، إحدى أشهرِ المصايفِ السعوديّةِ وتُسمّى (عروسَ المصايفِ)، وهي <span class="gl" data-m="مكان يقصده الناس في الصيف">مصيفٌ</span> جبليٌّ يتميّزُ بكثرةِ المتنزّهاتِ والحدائقِ.</p>
+<p>ومن أشهرِ المتنزّهاتِ في الطائفِ: الشَّفا والهَدى. كما يقصدُ السائحونَ <span class="gl" data-m="المواقع القديمة المشهورة">المعالمَ الأثريّةَ</span> مثلَ قصرِ شبرا وسدِّ وادي عكرمةَ. وتشتهرُ الطائفُ بزراعةِ العنبِ، والرمّانِ، والتوتِ، والتينِ الشوكيِّ (البرشوميّ).</p>
+<p>كما تحدّثَ عن منطقةِ الباحةِ التي يرتادُها المصطافونَ؛ لجمالِ طبيعتِها، حيثُ تكثرُ فيها المدرّجاتُ الزراعيّةُ والغاباتُ ومن أشهرِها غابةُ رغدانَ، كما تضمُّ العديدَ من الأسواقِ والمواقعِ التاريخيّةِ والآثارِ كالقلاعِ والحصونِ القديمةِ والقرى الأثريّةِ كقريةِ (ذي عين).</p>
+<p>ثمّ تحدّثَ حامدٌ عن منطقةِ عسيرَ التي فيها كثيرٌ من المصايفِ، من أهمّها مدينةُ أبها، وهي من أجملِ مصايفِ المملكةِ، وتُسمّى (عروسَ الجبلِ)، حيثُ ينعمُ السائحونَ فيها <span class="gl" data-m="الهواء اللطيف">بالنسيمِ العليلِ</span> والمناظرِ <span class="gl" data-m="الجميلة المحبّبة">الخلّابةِ</span> والخضرةِ الكثيفةِ، ومن أهمِّ المتنزّهاتِ السياحيّةِ فيها: متنزّهُ عسيرَ الوطنيُّ، ويتكوّنُ من عدّةِ مواقعَ، منها: السودةُ، ودلغانُ، والحبلةُ.</p>
+<p>ومن المصايفِ الجميلةِ في بلادِنا، منطقةُ جازانَ التي تمتازُ بالتنوّعِ البيئيِّ والمناخيِّ، وتُعدُّ البوابةَ الرئيسةَ لجزرِ فرسانَ.</p>
+<p>أيضًا مدينةُ نجرانَ وهي من أقدمِ المناطقِ التاريخيّةِ، حيثُ تشتهرُ جبالُها بالنقوشِ المتنوّعةِ وتوجدُ فيها الآثارُ كالأخدودِ.</p>
+<p>ولأنَّ هذه المصايفَ ذاتُ طبيعةٍ جبليّةٍ، فقد أنشأَتِ الحكومةُ شبكةً من الطرقِ والجسورِ والأنفاقِ التي <span class="gl" data-m="تصل، وضدها: تفصل">تربطُها</span> بمناطقِ المملكةِ؛ لتسهيلِ التنقّلِ لأغراضِ التعليمِ والتجارةِ والسياحةِ.</p>`}
+],
+ex:[
+ {t:"mcq", q:"ماذا طلب المعلم من التلاميذ؟", o:["كتابة ثلاثة أسطر","الحديث عن المصايف الجبلية","وصف رحلة"], a:1},
+ {t:"mcq", q:"أيّ مدينة تُسمّى (عروس المصايف)؟", o:["أبها","الطائف","نجران"], a:1},
+ {t:"mcq", q:"أيّ مدينة تُسمّى (عروس الجبل)؟", o:["أبها","الطائف","جازان"], a:0}
+]},
+{id:"u2-masayef-f", kind:"", sect:"الدرس الثاني: مصايفنا", title:"فهم النص وكلماته", pages:"ص 74، 75، 81، 82",
+learn:[
+ {h:"لخّصي المصايف بالجدول", b:`<table class="mini"><tr><th>المصيف</th><th>أهم ما فيه</th></tr><tr><td>الطائف (عروس المصايف)</td><td>الشفا والهدى، قصر شبرا، سد وادي عكرمة، العنب والرمان والتوت والتين الشوكي</td></tr><tr><td>الباحة</td><td>المدرجات الزراعية، غابة رغدان، قرية ذي عين</td></tr><tr><td>أبها في عسير (عروس الجبل)</td><td>متنزه عسير الوطني: السودة، دلغان، الحبلة</td></tr><tr><td>جازان</td><td>التنوع البيئي، البوابة الرئيسة لجزر فرسان</td></tr><tr><td>نجران</td><td>من أقدم المناطق التاريخية، النقوش، الأخدود</td></tr></table><p class="tip">أنشأت الحكومة الطرق والجسور والأنفاق لأن المصايف <b>جبلية</b>، لتسهيل التنقل للتعليم والتجارة والسياحة.</p><p>جملة الخط: «تحتضنُ منطقةُ تبوكَ مشروعَ (نيوم) أحدَ المشروعاتِ الوطنيّةِ الضخمةِ».</p>`},
+ {h:"الكلمات", b:`<table class="mini"><tr><th>الكلمة</th><th>معناها</th></tr><tr><td>المصيف</td><td>يقصده الناس في الصيف</td></tr><tr><td>المعالم الأثرية</td><td>المواقع القديمة المشهورة</td></tr><tr><td>النسيم العليل</td><td>الهواء اللطيف</td></tr><tr><td>الخلّابة</td><td>الجميلة المحبّبة</td></tr></table><p class="tip">خريطة (تربط): ضدها تفصل · مرادفها تصل · نوعها فعل مضارع.</p>`}
+],
+ex:[
+ {t:"sort", q:"صنّفي: فاكهة تشتهر بها الطائف أم لا؟", bins:["من فواكه الطائف","ليست في النص"], items:[["العنب",0],["التين الشوكي",0],["التوت",0],["الموز",1],["المشمش",1],["البطيخ",1]]},
+ {t:"sort", q:"صنّفي المتنزهات", bins:["الطائف","عسير"], items:[["الشفا",0],["الهدى",0],["السودة",1],["دلغان",1],["الحبلة",1]]},
+ {t:"match", q:"صِلي المكان بما يشتهر به", pairs:[["الباحة","غابة رغدان"],["جازان","بوابة جزر فرسان"],["نجران","الأخدود"],["الطائف","قصر شبرا"]]},
+ {t:"match", q:"صِلي الكلمة بمعناها", pairs:[["المصيف","يقصده الناس في الصيف"],["المعالم الأثرية","المواقع القديمة المشهورة"],["النسيم العليل","الهواء اللطيف"],["الخلّابة","الجميلة المحبّبة"]]},
+ {t:"mcq", q:"ضد (تربط):", o:["تصل","تفصل"], a:1},
+ {t:"mcq", hots:1, q:"لماذا أنشأت الحكومة الطرق والجسور والأنفاق؟", o:["للزينة","لأن المصايف جبلية، لتسهيل التنقل","لأن الناس يحبون الجسور"], a:1},
+ {t:"mcq", hots:1, q:"أيّ هذه ليس من معالم الرياض بل من الطائف؟", o:["المصمك","قصر شبرا","الدرعية"], a:1},
+ {t:"write", q:"اكتبي ما تستمتعين به في المصايف الجبلية (ثلاثة أشياء).", model:"الجو المعتدل والنسيم العليل، والخضرة والغابات، والعربات المعلّقة والمتنزهات."},
+ {t:"write", q:"تعطلت السيارة قبل السفر إلى البحر وأُلغيت الرحلة. بماذا تقضين الإجازة؟", model:"أزور حديقة قريبة أو أقاربي، وأقرأ قصصًا، وألعب مع إخوتي. (أي إجابة مناسبة)"}
+]},
+{id:"u2-masayef-g", kind:"", sect:"الدرس الثاني: مصايفنا", title:"ا أم ى، والتفضيل والأفعال", pages:"ص 76 إلى 80، 88 إلى 91",
+learn:[
+ {h:"الألف في آخر الكلمة", b:`<p><b>ألف قائمة (ا):</b> الشَّفا، دعا، سما، نما، عفا<br><b>ألف على صورة الياء (ى):</b> إحدى، الهدى، القرى، بكى، مشى، رمى، سعى، جرى</p><p class="tip">حيلة: هاتي المضارع: (يدعو) بالواو ← دعا. (يبكي) بالياء ← بكى.</p><p class="tip">ختم الاسم بتاء مربوطة يمنعه من زيادة ألف تنوين الفتح: جميلًا ← جميلةً.</p>`},
+ {h:"التفضيل والأفعال", b:`<div class="ex">غابة رغدان من <b>أشهر</b> الغابات في الباحة.<br>محافظة الطائف إحدى <b>أجمل</b> مصايف المملكة.<br>مدينة نجران من <b>أقدم</b> المدن التاريخية.</div><table class="mini"><tr><th>الماضي</th><th>المضارع</th><th>الأمر</th></tr><tr><td>سافرَ</td><td>يسافرُ</td><td>سافِرْ</td></tr><tr><td>ربطَ</td><td>يربطُ</td><td>اربطْ</td></tr><tr><td>طلبَ</td><td>يطلبُ</td><td>اطلبْ</td></tr><tr><td>بدأَ</td><td>يبدأُ</td><td>ابدأْ</td></tr><tr><td>قالَ</td><td>يقولُ</td><td>قُلْ</td></tr></table><p><b>علامات الترقيم:</b> أين تقع أبها<b>؟</b> · ما أجمل عسير<b>!</b> · في الرياض معالم تاريخية<b>.</b></p>`}
+],
+ex:[
+ {t:"sort", q:"ا أم ى؟", bins:["ألف قائمة (ا)","على صورة الياء (ى)"], items:[["دعـ..",0],["نمـ..",0],["سمـ..",0],["بكـ..",1],["مشـ..",1],["رمـ..",1]]},
+ {t:"mcq", q:"الكتابة الصحيحة:", o:["إحدا","إحدى"], a:1},
+ {t:"mcq", q:"غابة رغدان من (.......) الغابات في منطقة الباحة.", o:["أشهر","أقدم","أصغر"], a:0},
+ {t:"mcq", q:"مدينة نجران من (.......) المدن التاريخية.", o:["أجمل","أقدم"], a:1},
+ {t:"sort", q:"صنّفي الأفعال", bins:["ماضٍ","مضارع","أمر"], items:[["ربطَ",0],["طلبَ",0],["يقولُ",1],["يسافرُ",1],["ابدأْ",2],["اطلبْ",2]]},
+ {t:"mcq", q:"الأمر من (يقولُ):", o:["قالَ","قُلْ","يقولُ"], a:1},
+ {t:"mcq", q:"ضعي العلامة: ما أجمل منطقة عسير ( )", o:["؟","!","."], a:1},
+ {t:"mcq", q:"ضعي العلامة: أين تقع مدينة أبها ( )", o:["؟","!","."], a:0},
+ {t:"mcq", q:"(تقع) في: أين تقع حديقة المناخ؟", o:["فعل ماضٍ","فعل مضارع","حرف"], a:1},
+ {t:"mcq", q:"الكتابة الصحيحة: (......) هي النخلة!", o:["ما أطول","ما أطولا"], a:0},
+ {t:"write", q:"اكتبي ثلاث جمل فيها: أكثر، أحلى، أصغر.", model:"الطائف أكثر المدن حدائق. العنب أحلى من الليمون. أخي أصغر مني."}
+]},
+{id:"u2-masayef-d", kind:"dict", sect:"الدرس الثاني: مصايفنا", title:"إملاء مصايفنا", pages:"ص 78، 79، 92",
+learn:[{h:"انتبهي لهذه الكلمات", b:`<p class="tip">إحدى، تُسمّى، الهدى (ى) · الشَّفا (ا) · زملائهم، السائحون، الطائف (ئ) · مهنّدٌ، قائلًا · المتنزّهات (ت مفتوحة)</p>`}],
+ex:[
+ {t:"dict", kind:"إملاء منسوخ", text:"طلبَ المعلّمُ من التلاميذِ التحدّثَ إلى زملائِهم عن المصايفِ الجبليّةِ في المملكةِ العربيّةِ السعوديّةِ. بدأَ مهنّدٌ الحديثَ قائلًا: من المدنِ التي زرتُها وأعجبَتْني محافظةُ الطائفِ، إحدى أشهرِ المصايفِ السعوديّةِ وتُسمّى (عروسَ المصايفِ)."},
+ {t:"dict", kind:"إملاء منظور", text:"من أشهرِ المتنزّهاتِ في الطائفِ: الشَّفا والهَدى. كما يقصدُ السائحونَ المعالمَ الأثريّةَ، مثلَ: قصرِ شبرا، وسدِّ وادي عكرمةَ. وتشتهرُ الطائفُ بزراعةِ العنبِ، والرمّانِ، والتوتِ، والتينِ الشوكيِّ (البرشوميّ)."},
+ {t:"dict", kind:"إملاء منظور (التقويم)", text:"أنشأتِ الحكومةُ شبكةً من الطرقِ والجسورِ والأنفاقِ التي تربطُ المصايفَ الجبليّةَ بمناطقِ المملكةِ؛ لتسهيلِ التنقّلِ لأغراضِ التعليمِ والتجارةِ والسياحةِ."},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["تُسمّا","تُسمّى"], a:1},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["السائحون","الساءحون","السأحون"], a:0},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["قائلًا","قائلً"], a:0}
+]},
+{id:"u2-boss", kind:"boss", sect:"التحدي الكبير", title:"تحدي: الإسفنج", pages:"نموذج الاختبار ص 83 إلى 86",
+learn:[{h:"نص نموذج الاختبار (2) من الكتاب", b:`<div class="ex">الإسفنجُ كائنٌ حيٌّ يعيشُ في قاعِ المحيطاتِ، وليسَ للإسفنجِ رؤوسٌ أو أذرعٌ أو أعضاءٌ داخليّةٌ، ويعيشُ ملتصقًا بالصخورِ والنباتاتِ، والإسفنجُ مكتملُ النموِّ لا يتحرّكُ من مكانٍ لآخرَ؛ لذا فهو يشبهُ النباتاتِ، ويصنّفُه العلماءُ اليومَ من الحيواناتِ، فهو يأكلُ غذاءً لا يصنعُه بنفسِه كما تفعلُ النباتاتُ.<br>يوجدُ من الإسفنجِ ما يقربُ من (5,000) نوعٍ يعيشُ معظمُها في المحيطاتِ، إلّا أنَّ القليلَ منها يعيشُ في البحيراتِ والأنهارِ، كما أنَّ بإمكانِه العيشَ في المياهِ العميقةِ والضحلةِ على السواءِ.<br>يُعدُّ الإسفنجُ واحدًا من أقدمِ أنواعِ الحيواناتِ، إذ وُجدَتْ أحافيرُ لإسفنجٍ بحريٍّ كانَ يعيشُ قبلَ (500) مليونِ عامٍ. وتُعدُّ هياكلُ بعضِ أنواعِ الإسفنجِ أدواتٍ جيّدةً للتنظيفِ؛ نظرًا لكونِها ناعمةً وتمتصُّ قدرًا كبيرًا من الماءِ. ويصطادُ أصحابُ الصيدِ التجاريِّ الإسفنجَ من البحرِ الكاريبيِّ والبحرِ الأبيضِ المتوسّطِ، إلّا أنَّ معظمَ الإسفنجِ المستخدمِ في النظافةِ يُنتجُ صناعيًّا.</div><p class="small" style="color:var(--mut)">النص مختصر قليلًا من الكتاب.</p>`}],
+passage:"الإسفنج كائن حي يعيش في قاع المحيطات، ليس له رؤوس ولا أذرع ولا أعضاء داخلية، ويعيش ملتصقًا بالصخور ولا يتحرك فيشبه النبات، ويصنفه العلماء من الحيوانات لأنه يأكل غذاء لا يصنعه بنفسه. منه نحو 5000 نوع يعيش معظمها في المحيطات والقليل في البحيرات والأنهار. وُجدت أحافير له عمرها 500 مليون عام. هياكله أدوات جيدة للتنظيف لأنها ناعمة وتمتص الماء، ويُصطاد من البحر الكاريبي والأبيض المتوسط، ومعظم إسفنج النظافة يُنتج صناعيًّا.",
+ex:[
+ {t:"mcq", p:1, q:"بعض أنواع الإسفنج أدوات جيدة للتنظيف لـ:", o:["رائحتها الجيدة","ألوانها الجذابة","ملمسها الناعم","حجمها المناسب"], a:2},
+ {t:"mcq", p:1, q:"من البحار التي لم تُذكر في النص:", o:["الأبيض","الأحمر","الكاريبي","المتوسط"], a:1},
+ {t:"mcq", p:1, hots:1, q:"يشبه الإسفنج النبات في أنه:", o:["يأكل غذاءً لا يصنعه","لا يتحرك من مكان لآخر","له أذرع"], a:1},
+ {t:"mcq", p:1, hots:1, q:"صنّف العلماء الإسفنج من الحيوانات لأنه:", o:["يعيش في الماء","يأكل غذاءً لا يصنعه بنفسه","ناعم"], a:1},
+ {t:"mcq", p:1, q:"الرقم (500 مليون) في النص يدل على:", o:["عدد أنواع الإسفنج","عمر أحافير الإسفنج بالأعوام"], a:1},
+ {t:"mcq", p:1, q:"يعيش معظم الإسفنج في:", o:["البحيرات","الأنهار","المحيطات"], a:2},
+ {t:"mcq", p:1, hots:1, q:"نستنتج من النص أن أنواع الإسفنج:", o:["طبيعي فقط","طبيعي وصناعي","صناعي فقط"], a:1},
+ {t:"order", q:"رتّبي أفكار النص", words:["مكان عيش الإسفنج وشكله","أنواع الإسفنج","عمر الإسفنج","استخدامات الإسفنج"]},
+ {t:"write", q:"ما الفرق بين الأخطبوط والإسفنج في شكل الجسم؟", model:"الأخطبوط له رأس وأذرع طويلة وأعضاء داخلية، أما الإسفنج فليس له رأس ولا أذرع ولا أعضاء داخلية."},
+ {t:"write", q:"بعض أنواع الإسفنج تلتصق بالسفن الغارقة. ما تفسيرك؟", model:"لأن الإسفنج يعيش ملتصقًا بالصخور والأشياء الموجودة تحت سطح الماء ولا يتحرك."},
+ {t:"write", q:"اقترحي استخدامات جديدة للإسفنج.", model:"غسل الأطباق، وتنظيف السيارة، ومسح الطاولات. (أي استخدام مناسب)"}
+]}
+];
+
+/* ================= الوحدة الرابعة: وسائل الاتصالات (ص 133 إلى 170) ================= */
+const U4 = [
+{id:"u4-start", kind:"word", sect:"البداية", title:"الاتصالات والاستماع والنشيد", pages:"ص 135 إلى 139",
+learn:[
+ {h:"وسائل الاتصالات والحاسوب", b:`<p>أشياء لها علاقة بالاتصالات: الهاتف، السمّاعة، جهاز الشبكة، الرسائل، الحاسوب.<br>أشياء لها علاقة بالحاسوب: الفأرة، لوحة المفاتيح، الطابعة، السمّاعة، الذاكرة المتنقلة.</p><p><b>إشارات:</b> ممنوع التصوير، ممنوع استخدام الهاتف المحمول، البريد الإلكتروني، القمر الصناعي، طبق الاستقبال.</p><p class="tip">نص الاستماع (شبكة المعلومات): أحمد ووالده أمام الحاسوب. يرسل الوالد الرسائل عن طريق <b>البريد الإلكتروني</b> لأنه <b>الأسرع</b>.</p>`},
+ {h:"النشيد: صديق الحاسوب", b:`<div class="ex">حاسوبٌ زيّنَ لي بيتي * يرشدُني يحفظُ لي وقتي<br>ينقلُني نحوَ البلدانِ * يدخلُني جسمَ الإنسانِ<br>يقرأُ لي قصصَ الأجدادِ * صفحاتٍ تحكي الأمجادَ<br>يفتحُ لي بابَ المستقبلْ * لأصيرَ مُجِدًّا لا يغفلْ<br>لا ينسى شيئًا لا يسهو * في العلمِ يجدُّ ولا يلهو<br>ولأنّي طفلٌ موهوبُ * سأظلُّ صديقَ الحاسوبِ</div><table class="mini"><tr><th>الكلمة</th><th>معناها</th></tr><tr><td>يرشدني</td><td>يدلّني</td></tr><tr><td>يغفل</td><td>يهمل</td></tr><tr><td>يسهو</td><td>ينسى</td></tr></table>`}
+],
+ex:[
+ {t:"sort", q:"صنّفي: له علاقة بالحاسوب أم لا؟", bins:["من أدوات الحاسوب","ليس منها"], items:[["الفأرة",0],["لوحة المفاتيح",0],["الطابعة",0],["الخوذة",1],["المجهر",1]]},
+ {t:"match", q:"صِلي الكلمة بمعناها", pairs:[["يرشدني","يدلّني"],["يغفل","يهمل"],["يسهو","ينسى"]]},
+ {t:"mcq", q:"اختاري أداة السؤال: (.......) يرسل الوالد الرسائل؟", o:["كيف","لماذا"], a:0},
+ {t:"mcq", q:"اختاري أداة السؤال: (.......) يستخدم الوالد البريد الإلكتروني؟", o:["كيف","لماذا"], a:1, why:"الجواب سبب: لأنه الأسرع."},
+ {t:"mcq", q:"في النشيد: الحاسوب يفتح لي باب:", o:["البيت","المستقبل","المدرسة"], a:1},
+ {t:"mcq", hots:1, q:"(في العلم يجدّ ولا يلهو) نفهم أن الطفل يستخدم الحاسوب:", o:["للتعلّم","للعب فقط","للنوم"], a:0}
+]},
+{id:"u4-phone", kind:"read", sect:"الدرس الأول: الهاتف المحمول", title:"قصة الهاتف المحمول", pages:"ص 140، 141",
+learn:[
+ {h:"اقرئي القصة بصوت عالٍ", story:true, b:`
+<p>اصْطَحَبَ الْوالِدُ ابْنَهُ فَوّازًا؛ لِزِيارَةِ جارِهِمْ في الْمُسْتَشْفى، وَعِنْدَ <span class="gl" data-m="دخولهما">وُلوجِهِما</span> الْمُسْتَشْفى رَأى فَوّازٌ لَوْحَةً تُشيرُ إِلى مَنْعِ اسْتِخْدامِ الْهاتِفِ الْمَحْمولِ، مَكْتوبًا عَلَيْها: (يُمْنَعُ اسْتِخْدامُ الْهاتِفِ الْمَحْمولِ).</p>
+<p>سَأَلَ فَوّازٌ والِدَهُ: لِماذا يُمْنَعُ اسْتِخْدامُ الْهاتِفِ الْمَحْمولِ في الْمُسْتَشْفى يا أَبي؟</p>
+<p>الْوالِدُ وَهُوَ يُغْلِقُ جِهازَهُ: الْهاتِفُ الْمَحْمولُ قَدْ يُؤَثِّرُ عَلى بَعْضِ الْأَجْهِزَةِ الطِّبِّيَّةِ في الْمُسْتَشْفى يا بُنَيَّ.</p>
+<p>فَوّازٌ: حَقًّا يا أَبي؟!</p>
+<p>الْوالِدُ: لَيْسَ هذا <span class="gl" data-m="فقط">فَحَسْبُ</span> يا بُنَيَّ، فَهُناكَ أَماكِنُ <span class="gl" data-m="يُمنع">يُحْظَرُ</span> فيها اسْتِخْدامُ الْهاتِفِ الْمَحْمولِ.</p>
+<p>فَوّازٌ: مِثْلُ ماذا يا أَبي؟</p>
+<p>الْوالِدُ: مِثْلُ الطّائِراتِ، فَإِنَّ عَلَيْنا أَنْ نُغْلِقَ الْهَواتِفَ الْمَحْمولَةَ عِنْدَ صُعودِنا إِلَيْها. وَأَهَمُّ هذِهِ الْأَماكِنِ الْمَساجِدُ (بُيوتُ اللهِ)، فَرَنينُ الْهاتِفِ الْمَحْمولِ يُزْعِجُ الْمُصَلّينَ وَيَقْطَعُ خُشوعَهُمْ.</p>
+<p>إِنَّ الْهاتِفَ الْمَحْمولَ يا بُنَيَّ نِعْمَةٌ مِنَ اللهِ -عَزَّ وَجَلَّ- <span class="gl" data-m="أنعم">مَنَّ</span> بِها عَلَيْنا، وَبَعْضُنا يُسيءُ اسْتِخْدامَهُ، غَيْرَ مُقَدِّرٍ لِهذِهِ النِّعْمَةِ.</p>`}
+],
+ex:[
+ {t:"mcq", q:"إلى أين اصطحب الوالد ابنه؟", o:["المسجد","المستشفى لزيارة جارهم","المدرسة"], a:1},
+ {t:"mcq", q:"ماذا كان مكتوبًا على اللوحة؟", o:["يُمنع الدخول","يُمنع استخدام الهاتف المحمول","يُمنع التصوير"], a:1},
+ {t:"mcq", q:"ماذا فعل الوالد وهو يجيب فوّازًا؟", o:["أغلق جهازه","اتصل بصديقه","صوّر اللوحة"], a:0}
+]},
+{id:"u4-phone-f", kind:"", sect:"الدرس الأول: الهاتف المحمول", title:"فهم القصة وكلماتها", pages:"ص 142 إلى 144، 149، 150",
+learn:[
+ {h:"أهم ما في القصة", b:`<ul><li>يُمنع الهاتف في المستشفى لأنه <b>قد يؤثر على بعض الأجهزة الطبية</b>.</li><li>أماكن يُحظر فيها: <b>الطائرات</b>، و<b>أهمها المساجد</b> لأن رنينه يزعج المصلين ويقطع خشوعهم.</li><li>الهاتف <b>نعمة</b> من الله، ويكون نعمة <b>عندما نُحسن استخدامه</b>.</li></ul><p>جملة الخط: «إنَّ الهاتفَ المحمولَ يا بنيَّ نعمةٌ من اللهِ عزَّ وجلَّ منَّ بها علينا».</p><p class="tip">التعبير: رسالة إلكترونية لتهنئة صديق بعيد الأضحى: المستلم، الموضوع، البسملة، السلام، التهنئة، صديقك.</p>`},
+ {h:"الكلمات", b:`<table class="mini"><tr><th>الكلمة</th><th>معناها</th></tr><tr><td>ولوجهما</td><td>دخولهما</td></tr><tr><td>رأى</td><td>أبصر</td></tr><tr><td>فحسب</td><td>فقط</td></tr><tr><td>يُحظَر</td><td>يُمنع</td></tr><tr><td>منّ</td><td>أنعم</td></tr></table><p>ضد <b>نزول</b>: صعود · مفرد <b>أجهزة</b>: جهاز · مذكر <b>المحمولة</b>: المحمول · جمع <b>مكان</b>: أماكن · مذكر <b>طبية</b>: طبي</p><p class="tip">خريطة (يُغلق): ضدها يفتح · مرادفها يُقفل · نوعها فعل مضارع.</p><div class="ex"><b>يحضر</b> فوّاز إلى المدرسة باكرًا (يأتي) · <b>يُحظر</b> استخدام الأدوات الحادة للأطفال (يُمنع) · <b>يُحضر</b> خالد أدواته (يجلب)</div>`}
+],
+ex:[
+ {t:"mcq", q:"لماذا يُمنع الهاتف المحمول في المستشفى؟", o:["لأنه غالٍ","لأنه قد يؤثر على الأجهزة الطبية","لأنه ثقيل"], a:1},
+ {t:"mcq", q:"من الأماكن التي يُحظر فيها استخدام الهاتف:", o:["المساجد","المتنزهات والحدائق"], a:0},
+ {t:"mcq", q:"اللوحة في المستشفى تشير إلى أن:", o:["الدخول ممنوع","استخدام الهاتف المحمول ممنوع"], a:1},
+ {t:"mcq", q:"متى يكون الهاتف المحمول نعمة؟", o:["عندما نحسن استخدامه","عندما نسهر عليه"], a:0},
+ {t:"match", q:"صِلي الكلمة بمعناها", pairs:[["ولوجهما","دخولهما"],["فحسب","فقط"],["يُحظَر","يُمنع"],["منّ","أنعم"]]},
+ {t:"mcq", q:"ضد (نزول):", o:["صعود","هبوط"], a:0},
+ {t:"mcq", q:"مفرد (أجهزة):", o:["جهاز","جهازة"], a:0},
+ {t:"mcq", q:"ضد (يُغلق):", o:["يُقفل","يفتح"], a:1},
+ {t:"mcq", q:"(......) استخدام الأدوات الحادة للأطفال. (يُمنع)", o:["يُحظَر","يحضُر"], a:0},
+ {t:"mcq", q:"(......) فوّاز إلى المدرسة باكرًا. (يأتي)", o:["يُحظَر","يحضُر"], a:1},
+ {t:"mcq", hots:1, q:"لماذا كانت المساجد أهم الأماكن التي يُحظر فيها الهاتف؟", o:["لأنها بيوت الله ورنينه يقطع خشوع المصلين","لأنها بعيدة","لأنها كبيرة"], a:0},
+ {t:"mcq", hots:1, q:"(حقًّا يا أبي؟!) تدل على:", o:["التعجب","الغضب","الحزن"], a:0},
+ {t:"write", q:"اذكري مشكلة يسببها الهاتف المحمول، واقترحي حلًّا لها.", model:"السهر عليه وإهمال الدروس، والحل: تحديد وقت قصير لاستخدامه. (أي مشكلة مع حل مناسب)"},
+ {t:"write", q:"اكتبي نصيحة لمن يستخدم الهاتف المحمول.", model:"أغلق هاتفك في المسجد والمستشفى والطائرة، ولا تُطِل استخدامه."}
+]},
+{id:"u4-phone-g", kind:"", sect:"الدرس الأول: الهاتف المحمول", title:"ى والتاء والتفضيل والفاعل", pages:"ص 145 إلى 148",
+learn:[
+ {h:"الألف المقصورة والسكون والتاء", b:`<p><b>كلمات تنتهي بألف مقصورة (ى):</b> المستشفى، رأى، على، إلى<br><b>ثلاثة أحرف ساكنة الوسط:</b> منْع، بعْض، ليْس · <b>حرفان الثاني ساكن:</b> منْ، قدْ</p><div class="ex">لماذا يُمنع استخدام (الهاتف المحمول) في (المستشفى)؟ ← ال القمرية<br>علينا أن نغلق الهواتف (المحمولة) عند صعودنا إلى (الطائرة) ← تاء مربوطة<br>على نمط (المستشفيات): الطائرات ← تاء مفتوحة<br>على نمط (اصطحب): استخدام، ابنه، اسم ← همزة وصل</div>`},
+ {h:"التفضيل، واسم الفاعل والمفعول", b:`<div class="ex">المساجد <b>أطهر</b> الأماكن · الطائرة <b>أسرع</b> من السيارة · المساجد <b>أحب</b> البقاع إلى الله · المستشفى <b>أكبر</b> من المستوصف</div><table class="mini"><tr><th>الفعل</th><th>اسم الفاعل (فاعِل)</th><th>اسم المفعول (مَفعول)</th></tr><tr><td>طلب</td><td>طالب</td><td>مطلوب</td></tr><tr><td>صنع</td><td>صانع</td><td>مصنوع</td></tr><tr><td>علم</td><td>عالم</td><td>معلوم</td></tr><tr><td>كتب</td><td>كاتب</td><td>مكتوب</td></tr><tr><td>منع</td><td>مانع</td><td>ممنوع</td></tr><tr><td>سمع</td><td>سامع</td><td>مسموع</td></tr></table><p>هتف ← <b>الهاتف</b> · قرأ ← <b>قارئ</b></p>`}
+],
+ex:[
+ {t:"mcq", q:"كلمة تنتهي بألف مقصورة:", o:["المستشفى","المستشفيات","الهاتف"], a:0},
+ {t:"mcq", q:"كلمة من ثلاثة أحرف ساكنة الوسط:", o:["منْع","مَنَعَ","مانع"], a:0},
+ {t:"mcq", q:"(الهاتف المحمول) يبدأ بـ:", o:["ال الشمسية","ال القمرية"], a:1},
+ {t:"mcq", q:"الطائرة (......) من السيارة.", o:["أسرع","أصغر","أطول"], a:0},
+ {t:"mcq", q:"المستشفى (......) من المستوصف.", o:["أكبر","أسرع"], a:0},
+ {t:"match", q:"صِلي الفعل باسم الفاعل", pairs:[["طلب","طالب"],["صنع","صانع"],["علم","عالم"],["قرأ","قارئ"]]},
+ {t:"match", q:"صِلي الفعل باسم المفعول", pairs:[["كتب","مكتوب"],["منع","ممنوع"],["سمع","مسموع"],["صنع","مصنوع"]]},
+ {t:"sort", q:"اسم فاعل أم اسم مفعول؟", bins:["اسم فاعل","اسم مفعول"], items:[["الهاتف",0],["كاتب",0],["سامع",0],["المحمول",1],["مكتوب",1],["ممنوع",1]]},
+ {t:"write", q:"اكتبي جملة فيها اسم مفعول من (منع).", model:"استخدام الهاتف في المسجد ممنوع."}
+]},
+{id:"u4-phone-d", kind:"dict", sect:"الدرس الأول: الهاتف المحمول", title:"إملاء الهاتف المحمول", pages:"ص 146، 169",
+learn:[{h:"انتبهي لهذه الكلمات", b:`<p class="tip">يُحظَر (ظ) · المستشفى، رأى، على (ى) · اصطحب، استخدام (همزة وصل) · فوّازًا · لوحةً · المصلّين · يؤثّر (ؤ)</p>`}],
+ex:[
+ {t:"dict", kind:"إملاء منسوخ", text:"اصطحبَ الوالدُ ابنَه فوّازًا؛ لزيارةِ جارِهم في المستشفى، وعندَ ولوجِهما المستشفى رأى فوّازٌ لوحةً تشيرُ إلى منعِ استخدامِ الهاتفِ المحمولِ."},
+ {t:"dict", kind:"إملاء منظور", text:"هناكَ أماكنُ يُحظَرُ فيها استخدامُ الهاتفِ المحمولِ، مثلُ الطائراتِ، فإنَّ علينا أنْ نغلقَ الهواتفَ المحمولةَ عندَ صعودِنا إليها، وكذلكَ في المساجدِ، فرنينُ الهاتفِ المحمولِ يزعجُ المصلينَ ويقطعُ خشوعَهم."},
+ {t:"dict", kind:"إملاء منسوخ (التقويم)", text:"سألَ فوّازٌ والدَه: لماذا يُمنَعُ استخدامُ الهاتفِ المحمولِ في المستشفى يا أبي؟ الوالدُ وهو يغلقُ جهازَه: الهاتفُ المحمولُ قد يؤثرُ على بعضِ الأجهزةِ الطبيةِ في المستشفى يا بنيَّ."},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["المستشفا","المستشفى","المستشفي"], a:1},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["يُحضر استخدام الهاتف","يُحظر استخدام الهاتف"], a:1},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["يؤثر","يأثر","يئثر"], a:0}
+]},
+{id:"u4-sat", kind:"read", sect:"الدرس الثاني: الأقمار الصناعية", title:"قصة الأقمار الصناعية", pages:"ص 151، 152",
+learn:[
+ {h:"اقرئي القصة بصوت عالٍ", story:true, b:`
+<p>اجْتَمَعَتِ الْأُسْرَةُ؛ لِتُشاهِدَ <span class="gl" data-m="عرضًا">بَثًّا</span> مُباشِرًا لِيَوْمِ عَرَفَةَ، فَسَأَلَتْ دانِيَةُ والِدَها قائِلَةً: يا أَبي، كَيْفَ تُنْقَلُ صُوَرُ التِّلْفازِ مِنْ مَكانٍ إِلى آخَرَ؟</p>
+<p>الْوالِدُ: تُنْقَلُ عَنْ طَريقِ الْأَقْمارِ الصِّناعِيَّةِ، يا بُنَيَّتي.</p>
+<p>دانِيَةُ: وَما الْأَقْمارُ الصِّناعِيَّةُ؟</p>
+<p>الْوالِدُ: الْأَقْمارُ الصِّناعِيَّةُ هِيَ أَجْسامٌ تَدورُ في <span class="gl" data-m="الفراغ الواسع المحيط بالأرض">الْفَضاءِ</span> الْخارِجِيِّ حَوْلَ الْأَرْضِ، وَقَدْ صَنَعَها الْإِنْسانُ؛ لِأَداءِ <span class="gl" data-m="أعمال">مُهِمّاتٍ</span> كَثيرَةٍ.</p>
+<p>دانِيَةُ: وَما هذِهِ الْمُهِمّاتُ يا أَبي؟</p>
+<p>الْوالِدُ: هُناكَ كَثيرٌ مِنَ الْمُهِمّاتِ لِهذِهِ الْأَقْمارِ يا بُنَيَّتي؛ فَبَعْضُها يُسْتَخْدَمُ لِمَعْرِفَةِ حالَةِ <span class="gl" data-m="حالة الجو">الطَّقْسِ</span>، وَبَعْضُها يُسْتَخْدَمُ لِلِاتِّصالاتِ كَالْهَواتِفِ الْمَحْمولَةِ، وَبَعْضُها يُسْتَخْدَمُ لِنَقْلِ الْبَثِّ التِّلْفازِيِّ الْمُباشِرِ.</p>
+<p>دانِيَةُ: وَلِماذا سُمِّيَتْ بِالْأَقْمارِ يا أَبي؟</p>
+<p>الْوالِدُ: سُمِّيَتْ بِالْأَقْمارِ؛ لِأَنَّها تُشْبِهُ الْقَمَرَ في دَوَرانِهِ حَوْلَ الْأَرْضِ.</p>
+<p>دانِيَةُ: شُكْرًا يا أَبي، فَقَدْ تَعَلَّمْتُ الْيَوْمَ شَيْئًا جَديدًا، وَسَأَبْحَثُ في مَكْتَبَةِ الْمَدْرَسَةِ عَنْ مَزيدٍ مِنَ الْمَعْلوماتِ حَوْلَ الْأَقْمارِ الصِّناعِيَّةِ.</p>
+<p>الْوالِدُ: وَيُمْكِنُكِ الرُّجوعُ إِلى مَوْقِعِ مَدينَةِ الْمَلِكِ عَبْدِ الْعَزيزِ لِلْعُلومِ وَالتِّقْنِيَّةِ؛ لِمَعْرِفَةِ إِنْجازاتِ الْمَمْلَكَةِ الْعَرَبِيَّةِ السُّعودِيَّةِ في مَجالِ الْأَقْمارِ الصِّناعِيَّةِ.</p>`}
+],
+ex:[
+ {t:"mcq", q:"لماذا اجتمعت الأسرة؟", o:["لتشاهد بثًّا مباشرًا ليوم عرفة","لتسافر","لتزور الجد"], a:0},
+ {t:"mcq", q:"كيف تُنقل صور التلفاز؟", o:["عن طريق الأقمار الصناعية","بالبريد","بالطائرة"], a:0},
+ {t:"mcq", q:"أين ستبحث دانية عن المزيد؟", o:["في مكتبة المدرسة","في السوق"], a:0}
+]},
+{id:"u4-sat-f", kind:"", sect:"الدرس الثاني: الأقمار الصناعية", title:"فهم القصة وكلماتها", pages:"ص 153 إلى 155، 160، 161",
+learn:[
+ {h:"لخّصي بالجدول", b:`<table class="mini"><tr><th>تعريفها</th><td>أجسام تدور في الفضاء الخارجي حول الأرض، صنعها الإنسان لأداء مهمات كثيرة</td></tr><tr><th>مهماتها</th><td>1. معرفة حالة الطقس 2. الاتصالات كالهواتف المحمولة 3. نقل البث التلفازي المباشر</td></tr><tr><th>سبب التسمية</th><td>تشبه القمر في دورانه حول الأرض</td></tr></table><p class="tip">لا نراها بأعيننا لأنها بعيدة جدًّا في الفضاء الخارجي.</p><p>جملة الخط: «أطلقت المملكة العربية السعودية قمرين صناعيين؛ لاستخدامهما في التنمية الوطنية».</p>`},
+ {h:"الكلمات", b:`<table class="mini"><tr><th>الكلمة</th><th>معناها</th></tr><tr><td>بثًّا</td><td>عرضًا</td></tr><tr><td>الطقس</td><td>حالة الجو</td></tr><tr><td>مهمات</td><td>أعمال</td></tr><tr><td>الفضاء</td><td>الفراغ الواسع المحيط بالأرض</td></tr></table><p>مفرد <b>اتصالات</b>: اتصال · جمع <b>الأسرة</b>: الأُسَر · مذكر <b>صناعية</b>: صناعي · ضد <b>جديد</b>: قديم</p><p class="tip">خريطة (جديد): ضدها قديم · مرادفها حديث · نوعها اسم.</p>`}
+],
+ex:[
+ {t:"mcq", q:"ما الأقمار الصناعية؟", o:["أجسام صنعها الإنسان تدور حول الأرض","نجوم في السماء","طائرات سريعة"], a:0},
+ {t:"order", q:"رتّبي مهمات الأقمار الصناعية كما ذكرها الوالد", words:["معرفة حالة الطقس","الاتصالات كالهواتف المحمولة","نقل البث التلفازي المباشر"]},
+ {t:"mcq", q:"لماذا سُمّيت بالأقمار؟", o:["لأنها تضيء","لأنها تشبه القمر في دورانه حول الأرض","لأنها مستديرة"], a:1},
+ {t:"match", q:"صِلي الكلمة بمعناها", pairs:[["بثًّا","عرضًا"],["الطقس","حالة الجو"],["مهمات","أعمال"]]},
+ {t:"mcq", q:"ضد (جديد):", o:["حديث","قديم"], a:1},
+ {t:"mcq", q:"مفرد (اتصالات):", o:["اتصال","اتصالة"], a:0},
+ {t:"mcq", hots:1, q:"لماذا لا نرى الأقمار الصناعية بأعيننا؟", o:["لأنها بعيدة جدًّا في الفضاء","لأنها صغيرة جدًّا في البيت","لأنها تختفي في النهار"], a:0},
+ {t:"mcq", hots:1, q:"أيّ مهمة استفادت منها الأسرة في القصة؟", o:["معرفة الطقس","البث التلفازي المباشر","الاتصالات"], a:1},
+ {t:"mcq", hots:1, q:"ماذا يحدث لو تعطلت الأقمار الصناعية؟", o:["تنقطع الاتصالات والبث ولا نعرف الطقس","لا يتغير شيء","يزيد البث"], a:0},
+ {t:"write", q:"قارني بين القمر الطبيعي والقمر الصناعي.", model:"الشبه: كلاهما يدور حول الأرض. الاختلاف: الطبيعي خلقه الله ونراه، والصناعي صنعه الإنسان ولا نراه."},
+ {t:"write", q:"اكتبي ثلاث جمل عن أضرار الجلوس قريبًا من التلفاز.", model:"الجلوس قريبًا من التلفاز يُتعب العين. تحمرّ العين وتضعف. قد يحتاج صاحبها إلى نظارة."}
+]},
+{id:"u4-sat-g", kind:"", sect:"الدرس الثاني: الأقمار الصناعية", title:"ال والهاء والتنوين وإلّا والفاعل", pages:"ص 156 إلى 159، 165 إلى 168",
+learn:[
+ {h:"ال والمد والهاء والتنوين", b:`<p><b>ال الشمسية:</b> الصّناعية، الطّقس، التّلفاز · <b>ال القمرية:</b> الأسرة، الأقمار، الفضاء، الأرض، الإنسان</p><div class="ex">اجتمعت الأسرة (لتشاهد) بثًّا (مباشرًا) ← مد بالألف<br>سُمّيت بالأقمار؛ لأنها (تشبه) القمر في (دورانه) ← كلمات تنتهي بهاء</div><p><b>تنوين فتح</b> مثل بثًّا: مباشرًا، شيئًا، جديدًا · <b>تنوين كسر</b> مثل مهماتٍ: مكانٍ، مزيدٍ</p>`},
+ {h:"إلّا، واسم الفاعل للمذكر والمؤنث", b:`<div class="ex">اجتمعت الأسرة <b>إلّا دانيةَ</b>.</div><table class="mini"><tr><th>الفعل</th><th>فاعل مذكر</th><th>فاعل مؤنث</th></tr><tr><td>قال</td><td>قائل</td><td>قائلة</td></tr><tr><td>نام</td><td>نائم</td><td>نائمة</td></tr><tr><td>عام</td><td>عائم</td><td>عائمة</td></tr><tr><td>خاف</td><td>خائف</td><td>خائفة</td></tr></table><p class="tip">إذا كان وسط الفعل ألفًا (قال) تصير في اسم الفاعل همزة على نبرة: قائل.</p><p><b>من التقويم:</b> (الأسرة) معرفة بال · (المحمول) اسم مفعول · (أكبر) تفضيل · ما أكثرَ فوائد الهاتف المحمول! (تعجب)</p>`}
+],
+ex:[
+ {t:"sort", q:"ال الشمسية أم القمرية؟", bins:["شمسية","قمرية"], items:[["الصناعية",0],["الطقس",0],["التلفاز",0],["الأسرة",1],["الأقمار",1],["الفضاء",1]]},
+ {t:"mcq", q:"كلمة تنتهي بهاء:", o:["دورانه","الصناعية","الأسرة"], a:0},
+ {t:"sort", q:"تنوين فتح أم كسر؟", bins:["تنوين فتح","تنوين كسر"], items:[["بثًّا",0],["مباشرًا",0],["جديدًا",0],["مهماتٍ",1],["مكانٍ",1],["مزيدٍ",1]]},
+ {t:"mcq", q:"أكملي: اجتمعت الأسرة (.......)", o:["إلّا دانيةَ","إلّا دانيةُ"], a:0},
+ {t:"match", q:"صِلي الفعل باسم الفاعل المؤنث", pairs:[["قال","قائلة"],["نام","نائمة"],["خاف","خائفة"],["عام","عائمة"]]},
+ {t:"mcq", q:"اسم الفاعل المذكر من (نام):", o:["نائم","نايم","ناءم"], a:0},
+ {t:"mcq", q:"(القمر الطبيعي أكبر من القمر الصناعي) كلمة أكبر:", o:["تعجب","تفضيل","استثناء"], a:1},
+ {t:"mcq", q:"(الهاتف المحمول) كلمة المحمول:", o:["اسم فاعل","اسم مفعول"], a:1},
+ {t:"mcq", q:"فوّاز (......) في دراسته.", o:["ناجح","منجوح"], a:0},
+ {t:"sort", q:"صنّفي: تنتهي بياء (ي) أم بألف مقصورة (ى)؟", bins:["تنتهي بياء (ي)","تنتهي بألف مقصورة (ى)"], items:[["يصلّي",0],["يرمي",0],["تسقي",0],["يجري",0],["صلّى",1],["رمى",1]]},
+ {t:"write", q:"اكتبي جملة تعجب عن فوائد الهاتف المحمول.", model:"ما أكثرَ فوائدَ الهاتفِ المحمولِ!"}
+]},
+{id:"u4-sat-d", kind:"dict", sect:"الدرس الثاني: الأقمار الصناعية", title:"إملاء الأقمار الصناعية", pages:"ص 157، 158، 170",
+learn:[{h:"انتبهي لهذه الكلمات", b:`<p class="tip">بثًّا، مباشرًا، شيئًا، جديدًا (تنوين فتح) · قائلة (ئ) · الصناعية (ة) · الطقس (ط) · المعلومات، إنجازات (ت مفتوحة)</p>`}],
+ex:[
+ {t:"dict", kind:"إملاء منسوخ", text:"اجتمعتِ الأسرةُ؛ لتشاهدَ بثًّا مباشرًا ليومِ عرفةَ، فسألتْ دانيةُ والدَها قائلةً: يا أبي، كيفَ تُنقَلُ صورُ التلفازِ من مكانٍ إلى آخرَ؟ الوالدُ: تُنقَلُ عن طريقِ الأقمارِ الصناعيةِ، يا بنيّتي."},
+ {t:"dict", kind:"إملاء منظور", text:"دانيةُ: شكرًا يا أبي، فقد تعلّمتُ اليومَ شيئًا جديدًا، وسأبحثُ في مكتبةِ المدرسةِ عن مزيدٍ من المعلوماتِ حولَ الأقمارِ الصناعيةِ. الوالدُ: ويمكنُكِ الرجوعُ إلى موقعِ مدينةِ الملكِ عبدِ العزيزِ للعلومِ والتقنيةِ؛ لمعرفةِ إنجازاتِ المملكةِ العربيةِ السعوديةِ في مجالِ الأقمارِ الصناعيةِ."},
+ {t:"dict", kind:"إملاء منظور (التقويم)", text:"الوالدُ: هناكَ كثيرٌ من المهمّاتِ لهذه الأقمارِ يا بنيّتي؛ فبعضُها يُستخدَمُ لمعرفةِ حالةِ الطقسِ، وبعضُها يُستخدَمُ للاتصالاتِ كالهواتفِ المحمولةِ، وبعضُها يُستخدَمُ لنقلِ البثِّ التلفازيِّ المباشرِ."},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["شيئًا","شيأً","شيئً"], a:0},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["قائلةً","قايلة","قاءلة"], a:0},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["الطقس","التقس","الطقص"], a:0}
+]},
+{id:"u4-boss", kind:"boss", sect:"التحدي الكبير", title:"تحدي: الطفل وشجرة الموز", pages:"نموذج الاختبار ص 162 إلى 164",
+learn:[{h:"نص نموذج الاختبار (4) من الكتاب", b:`<div class="ex" style="font-size:17px">يُحكى أنّه وُجدَ في الغابةِ شجرةُ موزٍ كبيرةُ الحجمِ، وكانَ بالقربِ منها بحيرةٌ تذهبُ إليها جميعُ الحيواناتِ وهي سعيدةٌ ومجتمعةٌ، وكانتِ الشجرةُ تنظرُ إليهم وتتحسّرُ على وحدتِها، وفي أحدِ الأيامِ اقتربَ طفلٌ اسمُه أيمنُ من البحيرةِ؛ ليلعبَ بمائِها، وأحسَّ بالتعبِ، فاقتربَ من شجرةِ الموزِ؛ ليستظلَّ بظلِّها، فشعرتْ بالفرحِ وقالتْ: أهلًا بكَ يا صغيري، فقد آنستَ وحدتي، وسنكونُ صديقينِ على الدوامِ. فأهدتْه من ثمارِها.<br>كبرَ أيمنُ ولم يعدْ يأتي، وفي أحدِ الأيامِ اقتربَ شابٌّ وإذا به أيمنُ، فصرختْ: لقد اشتقتُ لكَ كثيرًا! تحدّثَ معها عن الفقرِ الذي يعانيه، فاقترحتْ عليه أنْ يأخذَ من ثمارِها ليبيعَها، حتى أصبحَ بائعًا للموزِ.<br>غابَ أيمنُ مدّةً طويلةً ثمَّ رجعَ مهمومًا، وقالَ: أريدُ أنْ أتزوّجَ؛ ولكنّي لا أملكُ ثمنَ البيتِ، قالتْ له: خذْ من جذعي فروعًا؛ لتبنيَ بيتَكَ، ولكنْ أرجوكَ لا تتركْني وحيدةً. فوعدَها بزيارتِها، وبنى بفروعِها البيتَ.<br>ومرّتِ السنواتُ، وأصبحَ أيمنُ شيخًا كبيرًا، فتذكّرَ الشجرةَ، فقالتْ له: إنّي لا أملكُ فاكهةً ولا أملكُ الجذوعَ لأهديَكَ إيّاها. هنا شعرَ أيمنُ بالحزنِ على تلكَ الأيامِ التي تركَ فيها الشجرةَ وحيدةً، واعتذرَ قائلًا: سامحيني يا أمّي الشجرةَ؛ فقد كنتُ أنانيًّا.</div><p class="small" style="color:var(--mut)">النص مختصر قليلًا من الكتاب.</p>`}],
+passage:"شجرة موز وحيدة في الغابة، اقترب منها الطفل أيمن فآنست وحدتها وأهدته ثمارها. كبر وانقطع عنها، ثم جاء شابًّا فقيرًا فأعطته ثمارها ليبيعها. ثم جاء يريد الزواج فأعطته فروعها ليبني بيته ووعدها بزيارتها. ثم صار شيخًا فقالت: لا أملك فاكهة ولا جذوعًا. فحزن واعتذر: سامحيني يا أمي الشجرة فقد كنت أنانيًّا.",
+ex:[
+ {t:"mcq", p:1, q:"وجه الشبه بين شجرة الموز والأم:", o:["العطاء","التسامح","الصداقة","الرحمة"], a:0},
+ {t:"mcq", p:1, q:"تعلّق الشجرة بالطفل يدل على:", o:["سكونها","خوفها","وحدتها","سعادتها"], a:2},
+ {t:"mcq", p:1, q:"قولها (إني لا أملك فاكهة ولا الجذوع) يدل على:", o:["كبر سنها","قلقها","غضبها","صدّها عنه"], a:0},
+ {t:"mcq", p:1, q:"وقعت الأحداث في:", o:["البحيرة","الحقل","الغابة","الوادي"], a:2},
+ {t:"mcq", p:1, q:"الفكرة التي تتضمن معنى القصة:", o:["القوة والشجاعة","الشدة والتسلط","الرحمة والتسامح","القدوة والصبر"], a:2},
+ {t:"mcq", p:1, hots:1, q:"نبرة الحزن والتحسر على أيمن بسبب:", o:["همومه ومرضه","كبر سنه","فقره وحاجته","هجرانه للشجرة"], a:3},
+ {t:"mcq", p:1, hots:1, q:"لو لم يقابل أيمن الشجرة في شبابه لظلّ:", o:["جائعًا (فقيرًا)","خائفًا","وحيدًا","عزبًا"], a:0},
+ {t:"order", q:"رتّبي ما أعطته الشجرة لأيمن", words:["الظل والموز وهو طفل","الثمار ليبيعها وهو شاب","الفروع ليبني بيته"]},
+ {t:"write", q:"قارني بين سلوك أيمن مع الشجرة في شبابه وفي شيخوخته.", model:"في شبابه: يأخذ منها ولا يزورها وينسى وعده. في شيخوخته: تذكّرها وزارها وندم واعتذر."},
+ {t:"write", q:"ما الشاهد على إنكار أيمن لمعروف الشجرة؟", model:"«كبر أيمن ولم يعد يأتي للعب تحت الشجرة»، ووعدها بزيارتها ثم تركها وحيدة."},
+ {t:"write", q:"اقترحي خاتمة جديدة للقصة.", model:"رجع أيمن يزور الشجرة كل يوم ويسقيها ويجلس في ظلها حتى لا تبقى وحيدة."}
+]}
+];
+
+/* ================= الوحدة الثالثة: أخلاق المسلم ================= */
+const U3 = [
+/* ---------------- 1 ---------------- */
+{id:"sifat", kind:"word", sect:"البداية", title:"صفات المسلم والنشيد", pages:"ص 96 إلى 101",
+learn:[
+ {h:"صفات يحبها الله", b:`<p>صفات يجب أن نتحلّى بها: <b>الكرم، الحياء، التعاون، الشجاعة، الصدق، الأمانة</b>.</p><p>وقدوتنا في الأخلاق: <b>رسول الله ﷺ</b>.</p>`},
+ {h:"نشيد: المسلم الصغير", b:`<div class="ex">المسلمُ الصغيرْ * إيمانُه كبيرْ<br>ضميرُه نقيٌّ * وقلبُه طَهورْ<br>يصحو مع الصباحْ * والبلبلِ الصَّدّاحْ<br>يسعى إلى النجاحْ * وسعيُه مشكورْ<br>طريقُه الجميلْ * أضاءه الرسولْ<br>وزادُه المحمولْ * الجِدُّ والتفكيرْ</div>
+ <table class="mini"><tr><th>الكلمة</th><th>معناها</th></tr><tr><td>الصَّدّاح</td><td>المغرِّد</td></tr><tr><td>زادُه</td><td>غذاؤه</td></tr><tr><td>وديع</td><td>هادئ</td></tr></table>`},
+ {h:"كيف؟ ولماذا؟", b:`<p>نسأل بـ<b>(لماذا)</b> عن <b>السبب</b>، ونسأل بـ<b>(كيف)</b> عن <b>الحال</b>.</p><div class="ex">لم يفرح ماجد بالدراجة لأنها لم تعجبه.<br>← <b>لماذا</b> لم يفرح ماجد بالدراجة؟</div><div class="ex">استيقظ الشقيقان مبتهجَين.<br>← <b>كيف</b> استيقظ الشقيقان؟</div><p class="tip">في نص الاستماع (أجمل هدية): الشقيقان <b>ماجد وعادل</b>، والهديتان <b>دراجتان</b>.</p>`}
+],
+ex:[
+ {t:"match", q:"صِلي الكلمة بمعناها", pairs:[["الصَّدّاح","المغرِّد"],["زادُه","غذاؤه"],["وديع","هادئ"]]},
+ {t:"match", q:"صِلي السلوك بالخُلُق المناسب", pairs:[["حفظ الأشياء وردّها إلى أصحابها","الأمانة"],["الرضا بما منحنا الله","القناعة"],["طلب العفو بعد الاعتراف بالخطأ","الاعتذار"],["العبوس والتحدث بنفور","الغضب"]]},
+ {t:"mcq", q:"طريق المسلم الصغير الجميل أضاءه:", o:["الصباح","الرسول ﷺ","البلبل","الربيع"], a:1, why:"في النشيد: طريقه الجميل أضاءه الرسول."},
+ {t:"mcq", q:"زاد المسلم الصغير المحمول هو:", o:["الطعام والماء","الجِدّ والتفكير","اللعب والمرح","الكتب والأقلام"], a:1, why:"زاده: غذاؤه، وغذاؤه الجد والتفكير."},
+ {t:"mcq", q:"اختاري أداة السؤال: (.......) لم يفرح ماجد بالدراجة؟", o:["كيف","لماذا","متى","أين"], a:1, why:"نسأل عن السبب بـ(لماذا)."},
+ {t:"mcq", q:"اختاري أداة السؤال: (.......) تصرّف عادل عندما رأى دراجته؟", o:["لماذا","كيف","مَن","كم"], a:1, why:"نسأل عن الحال بـ(كيف)."},
+ {t:"tf", q:"قدوتنا في الأخلاق هو رسول الله ﷺ.", a:true, why:"الرسول ﷺ قدوتنا في كل الصفات الحسنة."},
+ {t:"write", q:"ما أهم صفة من صفات المسلم في رأيكِ؟ ولماذا؟", model:"أهم صفة عندي الصدق؛ لأن الصادق يحبه الله والناس ويثقون به. (تُقبل أي صفة مع سبب صحيح)", hint:"ابدئي بـ: أهم صفة عندي ...؛ لأنّ ..."},
+ {t:"write", q:"حوّلي إلى سؤال بـ(لماذا): لم يفرح ماجد بالدراجة لأنها لم تعجبه.", model:"لماذا لم يفرح ماجد بالدراجة؟", hint:"لا تنسي علامة الاستفهام ؟"},
+ {t:"mcq", hots:1, q:"(ضميرُه نقيٌّ وقلبُه طَهور) نفهم منها أن المسلم الصغير:", o:["يحب اللعب","لا يحمل في قلبه سوءًا لأحد","يستيقظ متأخرًا","كثير الكلام"], a:1, why:"الضمير النقي والقلب الطهور يعني قلبًا نظيفًا من الحقد والسوء."}
+]},
+/* ---------------- 2 ---------------- */
+{id:"t-story", kind:"read", sect:"الدرس الأول: التعاون", title:"قصة التعاون", pages:"ص 102، 103",
+learn:[
+ {h:"اقرئي القصة بصوت عالٍ", story:true, b:`
+<p>فِي يَوْمِ الْبِيئَةِ الْعَالَمِيِّ، طَلَبَ الْمُعَلِّمُ مِنْ تَلَامِيذِهِ الْمُشَارَكَةَ <span class="gl" data-m="آراء">بِاقْتِرَاحَاتٍ</span> يُحَافِظُونَ بِهَا عَلَى بِيئَةِ الْمَدْرَسَةِ.</p>
+<p>أَخَذَ التَّلَامِيذُ يُفَكِّرُونَ، وَيَتَشَاوَرُونَ فِيمَا بَيْنَهُمْ، فَقَالَ فَوَّازٌ: فِي الْمَدْرَسَةِ سَاحَةٌ وَاسِعَةٌ، لِمَ لَا نَزْرَعُهَا لِتُصْبِحَ حَدِيقَةً؟</p>
+<p>رَدَّ حَازِمٌ: السَّاحَةُ وَاسِعَةٌ، وَنَحْنُ صِغَارٌ، فَكَيْفَ يُمْكِنُنَا أَنْ نَزْرَعَهَا؟</p>
+<p>أَجَابَ فَوَّازٌ: لَا <span class="gl" data-m="تَخافُ وتضطرب، وضدها: تطمئنّ">تَقْلَقْ</span> يَا حَازِمُ، فَبِالتَّعَاوُنِ نَجْتَازُ الصُّعُوبَاتِ، وَنُحَقِّقُ الْغَايَاتِ.</p>
+<p>قَالَ الْمُعَلِّمُ: أَحْسَنْتَ يَا فَوَّازُ، فَالتَّعَاوُنُ خُلُقُ الْمُسْلِمِ، وَقَدْ أَمَرَنَا اللهُ تَعَالَى بِهِ فِي قَوْلِهِ تَعَالَى: <span class="ayah">﴿وَتَعَاوَنُوا عَلَى الْبِرِّ وَالتَّقْوَى وَلَا تَعَاوَنُوا عَلَى الْإِثْمِ وَالْعُدْوَانِ﴾</span>.</p>
+<p>وَفِي الْيَوْمِ التَّالِي قَسَّمَ الْمُعَلِّمُ التَّلَامِيذَ مَجْمُوعَاتٍ، وَ<span class="gl" data-m="خصّ: أعطى شيئًا لواحد دون غيره، وضدها: عَمَّ">خَصَّ</span> كُلَّ مَجْمُوعَةٍ بِعَمَلٍ يَتَعَاوَنُ أَفْرَادُهَا عَلَى إِنْجَازِهِ؛ مَجْمُوعَةٌ تُنَظِّفُ السَّاحَةَ، وَثَانِيَةٌ تَحْفِرُ الْحُفَرَ، وَثَالِثَةٌ تَغْرِسُ <span class="gl" data-m="النباتات الصغيرة">الشَّتَلَاتِ</span>، وَرَابِعَةٌ تَسْقِيهَا بِالْمَاءِ.</p>
+<p>أَحْضَرَ الْمُعَلِّمُ الشَّتَلَاتِ، وَوَفَّرَ لِلْمَجْمُوعَاتِ أَدَوَاتِ الزِّرَاعَةِ، فَأَخَذَتِ الْمَجْمُوعَاتُ تَعْمَلُ بِجِدٍّ وَنَشَاطٍ، وَمَا إِنْ <span class="gl" data-m="قارَبَ">شَارَفَ</span> الْيَوْمُ الدِّرَاسِيُّ عَلَى الِانْتِهَاءِ حَتَّى كَانَتِ السَّاحَةُ حَدِيقَةً خَضْرَاءَ.</p>
+<p>دَهِشَ فَوَّازٌ مِنْ جَمَالِ الْحَدِيقَةِ، وَقَالَ: مَا أَجْمَلَ الْحَدِيقَةَ! اسْتَطَعْنَا أَنْ نُحَوِّلَ سَاحَةَ الْمَدْرَسَةِ إِلَى حَدِيقَةٍ <span class="gl" data-m="كثيرة الأشجار">غَنَّاءَ</span> فِي وَقْتٍ قَصِيرٍ، وَبِجُهْدٍ قَلِيلٍ.</p>
+<p>قَالَ الْمُعَلِّمُ: إِنَّ التَّعَاوُنَ ثَمَرَةٌ مِنْ ثَمَرَاتِ الْإِيمَانِ، يَزِيدُ <span class="gl" data-m="التماسك">التَّرَابُطَ</span> فِي الْمُجْتَمَعِ، وَ<span class="gl" data-m="يَنشُر">يُشِيعُ</span> الْمَحَبَّةَ وَالْمَوَدَّةَ بَيْنَ النَّاسِ.</p>`}
+],
+ex:[
+ {t:"mcq", q:"في أي يوم طلب المعلم الاقتراحات؟", o:["يوم المعلم","يوم البيئة العالمي","اليوم الوطني","أول يوم دراسي"], a:1},
+ {t:"mcq", q:"ماذا اقترح فوّاز؟", o:["تنظيف الفصل","زراعة ساحة المدرسة","رسم لوحة","شراء كتب"], a:1},
+ {t:"mcq", q:"مَن اعترض على الاقتراح؟", o:["المعلم","فوّاز","حازم","مدير المدرسة"], a:2}
+]},
+/* ---------------- 3 ---------------- */
+{id:"t-fahm", kind:"", sect:"الدرس الأول: التعاون", title:"فهم قصة التعاون", pages:"ص 100، 104، 112",
+learn:[
+ {h:"لخّصي بالجدول", b:`<table class="mini"><tr><th>الاقتراح</th><td>زراعة ساحة المدرسة</td></tr><tr><th>الصعوبة</th><td>الساحة واسعة ونحن صغار</td></tr><tr><th>الحل</th><td>التعاون</td></tr><tr><th>عدد المجموعات</th><td>4: تنظّف الساحة، تحفر الحفر، تغرس الشتلات، تسقيها بالماء</td></tr><tr><th>النتيجة</th><td>صارت الساحة حديقة خضراء</td></tr></table>
+<p class="tip">تعاون المعلم مع التلاميذ: <b>أحضر الشتلات، ووفّر أدوات الزراعة</b>.</p><p>التعاون <b>ثمرة من ثمرات الإيمان</b>: يزيد الترابط في المجتمع، ويُشيع المحبة والمودة بين الناس.</p>`},
+ {h:"عناصر القصة", b:`<table class="mini"><tr><th>الزمان</th><td>يوم البيئة العالمي، واليوم التالي</td></tr><tr><th>المكان</th><td>المدرسة (ساحة المدرسة)</td></tr><tr><th>الشخصيات</th><td>المعلم، فوّاز، حازم، التلاميذ</td></tr><tr><th>المشكلة</th><td>الساحة واسعة والتلاميذ صغار</td></tr><tr><th>الحل</th><td>التعاون وتقسيم العمل على مجموعات</td></tr></table><p class="tip">يوم البيئة العالمي: يوم يحتفل فيه العالم بالمحافظة على البيئة ونظافتها.</p>`}
+],
+ex:[
+ {t:"mcq", q:"ماذا طلب المعلم من تلاميذه؟", o:["أن يزرعوا الحديقة وحدهم","المشاركة باقتراحات يحافظون بها على بيئة المدرسة","أن ينظفوا الفصل","أن يكتبوا قصة"], a:1},
+ {t:"tf", q:"وافق التلاميذ جميعهم على اقتراح فوّاز.", a:false, why:"اعترض حازم وقال: الساحة واسعة ونحن صغار."},
+ {t:"mcq", q:"ما حجة حازم؟", o:["لا يوجد ماء","الساحة واسعة ونحن صغار","المعلم مشغول","الشتلات غالية"], a:1},
+ {t:"mcq", q:"بماذا ردّ فوّاز على حازم؟", o:["لن نزرعها","بالتعاون نجتاز الصعوبات ونحقق الغايات","سيزرعها المعلم","نزرعها غدًا"], a:1},
+ {t:"mcq", q:"كيف تعاون المعلم مع التلاميذ؟", o:["زرع الحديقة وحده","أحضر الشتلات ووفّر أدوات الزراعة","حفر الحفر","سقى الشتلات"], a:1},
+ {t:"order", q:"رتّبي عمل المجموعات كما في القصة", words:["تنظّف الساحة","تحفر الحفر","تغرس الشتلات","تسقيها بالماء"]},
+ {t:"match", q:"صِلي كل جزء من الجدول بما يناسبه", pairs:[["الاقتراح","زراعة الساحة"],["الصعوبة","الساحة واسعة"],["الحل","التعاون"],["النتيجة","حديقة خضراء"]]},
+ {t:"mcq", q:"التعاون ثمرة من ثمرات:", o:["الإيمان","الزراعة","الحديقة","المدرسة"], a:0},
+ {t:"mcq", q:"المقصود بيوم البيئة العالمي:", o:["يوم للعب في الحديقة","يوم للمحافظة على البيئة","يوم الإجازة","يوم شراء الشتلات"], a:1},
+ {t:"match", q:"صِلي عنصر القصة بما يناسبه", pairs:[["المكان","ساحة المدرسة"],["الزمان","يوم البيئة العالمي"],["المشكلة","الساحة واسعة ونحن صغار"],["الحل","التعاون"]]},
+ {t:"mcq", q:"مَن ليس من شخصيات قصة التعاون؟", o:["المعلم","فوّاز","حازم","عائشة"], a:3},
+ {t:"write", q:"اكتبي إجابة تامة: كيف تعاون المعلم مع التلاميذ؟", model:"تعاون المعلم مع التلاميذ بأن أحضر الشتلات، ووفّر للمجموعات أدوات الزراعة.", hint:"الإجابة التامة تعيد كلمات السؤال: تعاون المعلم مع التلاميذ بأن ..."},
+ {t:"write", q:"اكتبي إجابة تامة: ما نتيجة تعاون التلاميذ؟", model:"نتيجة تعاون التلاميذ أن الساحة صارت حديقة خضراء غنّاء في وقت قصير وبجهد قليل."},
+ {t:"write", q:"اكتبي مثالًا على التعاون داخل أسرتكِ.", model:"أتعاون مع أمي في ترتيب البيت، وأساعد إخوتي في واجباتهم. (أي مثال صحيح)"},
+ {t:"mcq", hots:1, q:"ما العبارة التي تدل على أن التعاون جعل العمل الكبير سهلًا؟", o:["الساحة واسعة ونحن صغار","في وقت قصير وبجهد قليل","في يوم البيئة العالمي","قسّم المعلم التلاميذ مجموعات"], a:1, why:"حوّلوا الساحة إلى حديقة في وقت قصير وبجهد قليل بفضل التعاون."},
+ {t:"mcq", hots:1, q:"لماذا اختار المعلم يوم البيئة العالمي ليطلب الاقتراحات؟", o:["لأنه يوم إجازة","لأنه يوم للمحافظة على البيئة","لأن المدرسة جديدة","لأن حازم طلب ذلك"], a:1, why:"يوم البيئة يناسب التفكير في المحافظة على بيئة المدرسة."},
+ {t:"mcq", hots:1, q:"ماذا تنصحين المجموعة الرابعة التي تسقي الشتلات؟", o:["أن تسقيها بكثير من الماء","أن تسقيها بقدر حاجتها ولا تُسرف في الماء","ألا تسقيها أبدًا","أن تتركها للمعلم"], a:1, why:"المحافظة على الماء وعدم الإسراف (البرنامج الوطني مائي)."},
+ {t:"mcq", hots:1, q:"ماذا يحدث لو عملت مجموعة واحدة فقط في الساحة؟", o:["تنتهي الحديقة أسرع","يتعبون ويتأخر العمل","لا يتغير شيء","تكبر الساحة"], a:1, why:"العمل الكبير يحتاج تعاون الجميع، ووحدهم سيتعبون ويتأخرون."},
+ {t:"mcq", hots:1, q:"الفرق بين حازم وفوّاز:", o:["حازم رأى الصعوبة وفوّاز رأى الحل","حازم رأى الحل وفوّاز رأى الصعوبة","كلاهما رفض الاقتراح","كلاهما خائف"], a:0}
+]},
+/* ---------------- 4 ---------------- */
+{id:"t-words", kind:"word", sect:"الدرس الأول: التعاون", title:"كلمات التعاون", pages:"ص 105، 106",
+learn:[
+ {h:"معاني الكلمات", b:`<table class="mini"><tr><th>الكلمة</th><th>معناها</th></tr><tr><td>اقتراحات</td><td>آراء</td></tr><tr><td>التَّرابُط</td><td>التماسك</td></tr><tr><td>يُشيع</td><td>ينشُر</td></tr><tr><td>شارَفَ</td><td>قارَبَ</td></tr><tr><td>الشَّتَلات</td><td>النباتات الصغيرة</td></tr><tr><td>غَنّاء</td><td>كثيرة الأشجار</td></tr></table>`},
+ {h:"الضد والجمع والمؤنث", b:`<p><b>خَصَّ × عَمَّ</b>:</p><div class="ex">الخيرُ <b>عَمَّ</b> كلَّ الناس.<br><b>خَصَّ</b> مديرُ المدرسة الطالبَ المتفوّق بهدية ثمينة.</div><p>ضد <b>كثير</b>: قليل · كلمة مفردها <b>صعوبة</b>: الصعوبات · مفرد <b>حدائق</b>: حديقة · مؤنث <b>واسع</b>: واسعة · مؤنث <b>المسلم</b>: مسلمة</p>
+<p class="tip">خريطة (تقلق): معناها تخاف وتضطرب · ضدها تطمئنّ · نوعها فعل مضارع · الاسم منها القلق</p>`}
+],
+ex:[
+ {t:"match", q:"صِلي الكلمة بمعناها", pairs:[["اقتراحات","آراء"],["الترابط","التماسك"],["يُشيع","ينشُر"],["شارَف","قارَب"]]},
+ {t:"match", q:"صِلي الكلمة بمعناها", pairs:[["الشتلات","النباتات الصغيرة"],["غَنّاء","كثيرة الأشجار"],["تقلق","تخاف"]]},
+ {t:"mcq", q:"أكملي: الخيرُ (.......) كلَّ الناس.", o:["خَصَّ","عَمَّ"], a:1, why:"عمّ: شمل الجميع."},
+ {t:"mcq", q:"أكملي: (.......) مديرُ المدرسة الطالبَ المتفوّق بهدية ثمينة.", o:["خَصَّ","عَمَّ"], a:0, why:"خصّ: أعطى واحدًا دون غيره."},
+ {t:"mcq", q:"ضد كلمة (تقلق):", o:["تخاف","تطمئنّ","تحزن","تغضب"], a:1},
+ {t:"mcq", q:"نوع كلمة (تقلق):", o:["اسم","فعل مضارع","حرف","فعل ماضٍ"], a:1},
+ {t:"mcq", q:"مفرد كلمة (حدائق):", o:["حديقة","حدائقة","حدق","محدقة"], a:0},
+ {t:"mcq", q:"ضد كلمة (كثير):", o:["كبير","قليل","واسع","جميل"], a:1},
+ {t:"mcq", q:"الجمع من كلمة (صعوبة) في القصة:", o:["صعاب","الصعوبات","صعبة","مصاعب"], a:1},
+ {t:"mcq", q:"ضد كلمة (واسعة):", o:["ضيّقة","كبيرة","جميلة","خضراء"], a:0}
+]},
+/* ---------------- 5 ---------------- */
+{id:"t-sounds", kind:"", sect:"الدرس الأول: التعاون", title:"المد والتنوين والهمزات", pages:"ص 107، 108",
+learn:[
+ {h:"المد والتضعيف", b:`<p><b>مد بالألف:</b> فقال، ساحة، واسعة، لا · <b>مد بالواو:</b> يفكرون، يتشاورون · <b>مد بالياء:</b> فيما، حديقة، يُشيع</p><p><b>الحرف المضعّف</b> عليه شدّة (ــّ): قسَّم، التَّلاميذ، خصَّ، كلّ</p>`},
+ {h:"التنوين", b:`<div class="ex">تنوين ضم (ــٌ): ساحةٌ واسعةٌ، ونحن صغارٌ<br>تنوين كسر (ــٍ): مجموعاتٍ، مجموعةٍ، بعملٍ<br>تنوين فتح (ــً): حديقةً، طعامًا</div><p class="tip">تنوين الفتح نزيد بعده ألفًا (طعامًا)، إلا إذا انتهت الكلمة بتاء مربوطة (حديقةً).</p>`},
+ {h:"همزة الوصل وهمزة القطع", b:`<p><b>همزة الوصل (ا):</b> لا تُنطق عند وصل الكلام، ولا نكتب عليها رأس عين.<br>على نمط (اِقتراحات): <b>استطعنا، الانتهاء</b></p><p><b>همزة القطع (أ / إ):</b> تُنطق دائمًا.<br>على نمط (أمر): <b>أخذ، أحضر، أحسنت، أفرادها، إنجاز، إيمان</b></p><p class="tip">حيلة: ضعي (و) قبلها: (وأخذ) نسمع الهمزة، فهي قطع. (واستطعنا) لا نسمعها، فهي وصل.</p>`}
+],
+ex:[
+ {t:"sort", q:"صنّفي الكلمات حسب حرف المد", bins:["مد بالألف","مد بالواو","مد بالياء"], items:[["ساحة",0],["فقال",0],["يفكرون",1],["فيما",2],["حديقة",2],["يُشيع",2]]},
+ {t:"mcq", q:"أيّ كلمة فيها حرف مضعّف؟", o:["قسَّم","قَسَم","قسمة","أقسام"], a:0},
+ {t:"sort", q:"صنّفي حسب نوع التنوين", bins:["تنوين ضم ــٌ","تنوين كسر ــٍ"], items:[["ساحةٌ",0],["صغارٌ",0],["واسعةٌ",0],["مجموعاتٍ",1],["بعملٍ",1],["مجموعةٍ",1]]},
+ {t:"sort", q:"همزة وصل أم همزة قطع؟", bins:["همزة وصل","همزة قطع"], items:[["استطعنا",0],["الانتهاء",0],["اقتراحات",0],["أخذ",1],["أحضر",1],["إنجاز",1],["أحسنت",1]]},
+ {t:"mcq", q:"كلمة (إيمان) تبدأ بـ:", o:["همزة وصل","همزة قطع"], a:1, why:"نقول (والإيمان): نسمع الهمزة، فهي قطع."},
+ {t:"mcq", q:"الكتابة الصحيحة:", o:["إستطعنا","استطعنا"], a:1, why:"همزة وصل، لا نكتب تحتها همزة."},
+ {t:"mcq", q:"أكملي بالتنوين الصحيح: لِمَ لا نزرعها لتصبح (.......)؟", o:["حديقةًا","حديقةً","حديقتًا"], a:1, why:"لا نزيد ألفًا بعد التاء المربوطة."}
+]},
+/* ---------------- 6 ---------------- */
+{id:"t-style", kind:"word", sect:"الدرس الأول: التعاون", title:"التعجب والمعرفة والنكرة", pages:"ص 110 إلى 114",
+learn:[
+ {h:"أسلوب التعجب: ما أفعلَ!", b:`<p>نتعجب عندما يُعجبنا شيء أو يدهشنا، ونضع في آخره <b>علامة التعجب (!)</b>.</p><div class="ex">حديقة نظيفة ← ما أنظفَ الحديقةَ!<br>شتلات كثيرة ← ما أكثرَ الشتلاتِ!<br>وردة زاهية ← ما أزهى الوردةَ!</div><p>ومن القصة: <b>ما أجملَ الحديقةَ!</b></p>`},
+ {h:"المعرفة والنكرة", b:`<p><b>النكرة:</b> اسم غير محدّد: ساحة، يوم، معلم.<br><b>المعرفة:</b> اسم محدّد، ومنه:</p><ul><li><b>المعرّف بـ(ال):</b> الساحة، المعلم، الشتلات</li><li><b>العَلَم:</b> اسم شخص: فوّاز، حازم</li></ul><div class="ex">ساحة ← الساحة · يوم ← اليوم · معلم ← المعلم · صعوبات ← الصعوبات · شتلات ← الشتلات · تعاون ← التعاون · زراعة ← الزراعة · حديقة ← الحديقة</div>`},
+ {h:"الخط والتعبير", b:`<p>جملة الخط: <b>بالتعاون نجتاز الصعوبات، ونحقق الغايات.</b></p><p>نغيّر ترتيب الجملة والمعنى لا يتغير:</p><div class="ex">تحوّلت ساحة المدرسة إلى حديقة غنّاء بفضل التعاون.<br>← بفضل التعاون تحوّلت ساحة المدرسة إلى حديقة غنّاء.</div>`}
+],
+ex:[
+ {t:"order", q:"كوّني جملة تعجب: (حديقة نظيفة)", words:["ما","أنظفَ","الحديقةَ!"]},
+ {t:"mcq", q:"تعجّبي من: شتلات كثيرة", o:["الشتلات كثيرة.","ما أكثرَ الشتلاتِ!","هل الشتلات كثيرة؟","أكثر الشتلات"], a:1},
+ {t:"mcq", q:"تعجّبي من: وردة زاهية", o:["ما أزهى الوردةَ!","الوردة زاهية.","أين الوردة؟","ما الوردة؟"], a:0},
+ {t:"mcq", q:"العلامة التي تأتي في آخر جملة التعجب:", o:["؟","!",".","،"], a:1},
+ {t:"sort", q:"صنّفي: عَلَم أم معرّف بـ(ال) أم نكرة؟", bins:["عَلَم","معرّف بـ ال","نكرة"], items:[["فوّاز",0],["حازم",0],["المعلم",1],["الشتلات",1],["ساحة",2],["يوم",2]]},
+ {t:"mcq", q:"حوّلي النكرة إلى معرفة: (صعوبات)", o:["صعوبة","الصعوبات","صعب","صعوباتٌ"], a:1},
+ {t:"mcq", q:"(قال فوّاز). كلمة فوّاز:", o:["نكرة","معرّف بـ ال","عَلَم"], a:2},
+ {t:"order", q:"رتّبي جملة الخط", words:["بالتعاون","نجتاز","الصعوبات،","ونحقق","الغايات."]},
+ {t:"mcq", q:"ضعي عَلَمًا مكان الكلمة الملوّنة: قال (التلميذ): في المدرسة ساحة واسعة.", o:["قال الولد","قال فوّاز","قال تلميذ"], a:1, why:"فوّاز اسم شخص، فهو عَلَم."},
+ {t:"order", q:"غيّري الترتيب: (اقتراح فوّاز زراعة ساحة المدرسة) ابدئي بـ(زراعة)", words:["زراعة","ساحة","المدرسة","اقتراح","فوّاز."]},
+ {t:"write", q:"اكتبي جملة الخط في دفترك بخط جميل: بالتعاون نجتاز الصعوبات، ونحقق الغايات.", model:"بالتعاون نجتاز الصعوبات، ونحقق الغايات.", hint:"انتبهي: الصعوبات والغايات بتاء مفتوحة."},
+ {t:"write", q:"اكتبي جملة تعجب عن مدرستكِ.", model:"ما أجملَ مدرستي! (أو: ما أنظفَ فصلي!)", hint:"ابدئي بـ(ما أفعلَ) واختمي بعلامة التعجب !"},
+ {t:"write", q:"حوّلي إلى معرفة واكتبيها في جملة: (شتلات)", model:"الشتلات: غرست المجموعة الثالثة الشتلات."},
+ {t:"mcq", hots:1, q:"أيّ جملة لها نفس معنى: (تحوّلت الساحة إلى حديقة بفضل التعاون)؟", o:["بفضل التعاون تحوّلت الساحة إلى حديقة.","تحوّلت الحديقة إلى ساحة.","لم تتحوّل الساحة.","التعاون ساحة."], a:0}
+]},
+/* ---------------- 7 ---------------- */
+{id:"t-dict", kind:"dict", sect:"الدرس الأول: التعاون", title:"إملاء التعاون", pages:"ص 109",
+learn:[
+ {h:"كيف نتدرّب؟", b:`<p><b>المنسوخ:</b> تنقلين القطعة وأنتِ ترينها.<br><b>المنظور:</b> تقرئينها مرتين، ثم نُخفيها وتمليها عليكِ ماما.</p><p class="tip">انتبهي: يحافظون (ظ) · باقتراحاتٍ (همزة وصل) · مجموعةٌ (ة) · قسَّم (شدّة)</p>`}
+],
+ex:[
+ {t:"dict", kind:"إملاء منسوخ", text:"في يومِ البيئةِ العالميِّ، طلبَ المعلمُ من تلاميذِه المشاركةَ باقتراحاتٍ يحافظونَ بها على بيئةِ المدرسةِ. أخذَ التلاميذُ يفكرونَ، ويتشاورونَ فيما بينَهم، فقالَ فوّازٌ: في المدرسةِ ساحةٌ واسعةٌ، لِمَ لا نزرعُها لتصبحَ حديقةً؟"},
+ {t:"dict", kind:"إملاء منظور", text:"قسَّمَ المعلمُ التلاميذَ مجموعاتٍ، وخصَّ كلَّ مجموعةٍ بعملٍ يتعاونُ أفرادُها على إنجازِه؛ مجموعةٌ تنظّفُ الساحةَ، وثانيةٌ تحفرُ الحفرَ، وثالثةٌ تغرسُ الشتلاتِ، ورابعةٌ تسقيها بالماءِ."},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["يحافضون","يحافظون","يحافذون"], a:1},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["إقتراحات","اقتراحات","أقتراحات"], a:1},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["الشتلاة","الشتلات"], a:1, why:"جمع، تُكتب بتاء مفتوحة."},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["إنجازه","انجازه"], a:0, why:"همزة قطع: نقول (وإنجازه) فنسمعها."},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["تنضّف","تنظّف"], a:1}
+]},
+/* ---------------- 8 ---------------- */
+{id:"i-story", kind:"read", sect:"الدرس الثاني: الإيثار", title:"قصة الإيثار", pages:"ص 115، 116",
+learn:[
+ {h:"اقرئي القصة بصوت عالٍ", story:true, b:`
+<p>قَرَّرَ فَوَّازٌ شِرَاءَ كِتَابٍ مُفِيدٍ <span class="gl" data-m="مستفيدًا">مُسْتَثْمِرًا</span> نُقُودًا كَانَ قَدْ جَمَعَهَا فِي حَصَّالَتِهِ الصَّغِيرَةِ. طَلَبَ فَوَّازٌ مِنْ وَالِدِهِ أَنْ يَصْطَحِبَهُ إِلَى الْمَكْتَبَةِ؛ لِشِرَاءِ الْكِتَابِ، وَبَعْدَ فَرَاغِهِ مِنَ الْوَاجِبَاتِ الْمَنْزِلِيَّةِ ذَهَبَ مَعَ وَالِدِهِ إِلَى الْمَكْتَبَةِ، وَأَخَذَا يَتَجَوَّلَانِ فِيهَا وَيُطَالِعَانِ أَبْرَزَ عَنَاوِينِ مُحْتَوَيَاتِهَا مِنْ كُتُبٍ وَقِصَصٍ.</p>
+<p>تَوَقَّفَ فَوَّازٌ عِنْدَ قِصَّةٍ عُنْوَانُهَا (<span class="gl" data-m="تفضيل الغير على النفس، وضده: الأنانية">الْإِيثَارُ</span>)، فَسَأَلَ وَالِدَهُ: مَا مَعْنَى الْإِيثَارِ يَا أَبِي؟ رَدَّ الْوَالِدُ: اشْتَرِ الْقِصَّةَ، وَاقْرَأْهَا؛ لِتَعْرِفَ مَعْنَى الْإِيثَارِ. اشْتَرَى فَوَّازٌ الْقِصَّةَ، وَعَادَ إِلَى الْبَيْتِ مُشْتَاقًا لِقِرَاءَتِهَا.</p>
+<p>وَفِي الْقِصَّةِ قَرَأَ كَيْفَ آثَرَتْ أُمُّ الْمُؤْمِنِينَ عَائِشَةُ -رَضِيَ اللهُ عَنْهَا- الْمَرْأَةَ الْفَقِيرَةَ وَابْنَتَيْهَا عَلَى نَفْسِهَا، وَكَيْفَ آثَرَتِ الْأُمُّ ابْنَتَيْهَا عَلَى نَفْسِهَا.</p>
+<p>وَفِي الْمَسَاءِ قَدِمَ الْوَالِدُ مِنْ عَمَلِهِ وَسَأَلَ فَوَّازًا: هَلْ قَرَأْتَ الْقِصَّةَ، وَعَرَفْتَ مَعْنَى الْإِيثَارِ؟</p>
+<p>قَالَ فَوَّازٌ: نَعَمْ يَا أَبِي، وَالْقِصَّةُ هِيَ الَّتِي عَرَّفَتْنِي إِيَّاهُ: سَمِعَتْ أُمُّ الْمُؤْمِنِينَ عَائِشَةُ -رَضِيَ اللهُ عَنْهَا- طَرَقَاتٍ عَلَى الْبَابِ، فَلَمَّا نَظَرَتْ، وَجَدَتِ امْرَأَةً مِسْكِينَةً، وَمَعَهَا ابْنَتَاهَا الصَّغِيرَتَانِ، وَطَلَبَتِ الْمَرْأَةُ مِنْهَا طَعَامًا، وَلَمْ يَكُنْ فِي بَيْتِ أُمِّ الْمُؤْمِنِينَ عَائِشَةَ -رَضِيَ اللهُ عَنْهَا- فِي هَذَا الْيَوْمِ إِلَّا ثَلَاثُ تَمَرَاتٍ، فَأَحْضَرَتْهَا، وَأَعْطَتْهَا الْمَرْأَةَ.</p>
+<p>أَخَذَتِ الْمَرْأَةُ التَّمَرَاتِ، وَأَعْطَتْ كُلَّ بِنْتٍ تَمْرَةً، وَأَخَذَتْ هِيَ التَّمْرَةَ الثَّالِثَةَ. فَأَكَلَتِ الْبِنْتَانِ التَّمْرَتَيْنِ، ثُمَّ نَظَرَتَا إِلَى التَّمْرَةِ الَّتِي فِي يَدِ أُمِّهِمَا، فَلَمْ تَتَرَدَّدِ الْأُمُّ، وَشَقَّتِ التَّمْرَةَ نِصْفَيْنِ، وَأَعْطَتْ كُلَّ بِنْتٍ مِنْهُمَا نِصْفًا، وَآثَرَتِ الْأُمُّ أَنْ تُطْعِمَ ابْنَتَيْهَا وَتَبْقَى جَائِعَةً.</p>
+<p>أُعْجِبَتْ أُمُّ الْمُؤْمِنِينَ عَائِشَةُ -رَضِيَ اللهُ عَنْهَا- بِمَا فَعَلَتْهُ هَذِهِ الْمَرْأَةُ، وَلَمَّا جَاءَ رَسُولُ اللهِ ﷺ حَكَتْ ذَلِكَ الْمَوْقِفَ الَّذِي يَدُلُّ عَلَى إِيثَارِ الْأُمِّ، فَقَالَ لَهَا الرَّسُولُ ﷺ: «إِنَّ اللهَ قَدْ أَوْجَبَ لَهَا الْجَنَّةَ».</p>
+<p>الْوَالِدُ: مَا أَجْمَلَ الْإِيثَارَ يَا بُنَيَّ! فَالْمُسْلِمُ الْحَقُّ <span class="gl" data-m="يُفضِّل غيره على نفسه">يُؤْثِرُ</span> غَيْرَهُ عَلَى نَفْسِهِ، فَيَجُوعُ؛ لِيَشْبَعَ أَخُوهُ، وَ<span class="gl" data-m="يعطش، وضدها: يرتوي">يَظْمَأُ</span>؛ لِيَرْتَوِيَ أَخُوهُ. قَالَ تَعَالَى: <span class="ayah">﴿وَيُؤْثِرُونَ عَلَى أَنْفُسِهِمْ وَلَوْ كَانَ بِهِمْ خَصَاصَةٌ وَمَنْ يُوقَ شُحَّ نَفْسِهِ فَأُولَئِكَ هُمُ الْمُفْلِحُونَ﴾</span>.</p>`}
+],
+ex:[
+ {t:"mcq", q:"ماذا قرّر فوّاز أن يشتري؟", o:["لعبة","كتابًا مفيدًا","حصّالة","تمرًا"], a:1},
+ {t:"mcq", q:"ما عنوان القصة التي توقّف عندها فوّاز؟", o:["التعاون","الإيثار","الأمانة","الصدق"], a:1},
+ {t:"mcq", q:"كم تمرة كانت في بيت أم المؤمنين عائشة؟", o:["تمرتان","ثلاث تمرات","أربع تمرات","تمرة واحدة"], a:1}
+]},
+/* ---------------- 9 ---------------- */
+{id:"i-fahm", kind:"", sect:"الدرس الثاني: الإيثار", title:"فهم قصة الإيثار", pages:"ص 117",
+learn:[
+ {h:"أهم ما في القصة", b:`<ul><li>اشترى فوّاز الكتاب بنقود جمعها في <b>حصّالته</b>، وذهب مع <b>والده</b> إلى المكتبة <b>بعد أن أنهى واجباته</b>.</li><li>دار الحوار بين <b>فوّاز ووالده</b>. وعاد الوالد من عمله <b>في المساء</b>.</li><li>المرأة شقّت التمرة لابنتيها وبقيت جائعة، فتحلّت بخُلُق <b>الإيثار</b>.</li><li>قال ﷺ: <b>«إن الله قد أوجب لها الجنة»</b>.</li></ul><p class="tip">الإيثار: أن تفضّلي غيرك على نفسك.</p>`}
+],
+ex:[
+ {t:"mcq", q:"مَن اصطحب فوّازًا إلى المكتبة؟", o:["أمه","والده","معلمه","صديقه"], a:1},
+ {t:"mcq", q:"متى عاد الوالد من عمله؟", o:["في الصباح","في المساء","في الظهر","بعد أسبوع"], a:1},
+ {t:"mcq", q:"دار الحوار في القصة بين:", o:["فوّاز ومعلمه","فوّاز ووالده","فوّاز وحازم","عائشة والمرأة"], a:1},
+ {t:"mcq", q:"الخُلُق الذي تحلّت به المرأة:", o:["الإيثار","البخل","الغضب","الأنانية"], a:0},
+ {t:"tf", q:"ذهب فوّاز إلى المكتبة قبل أن يُنهي واجباته.", a:false, why:"ذهب بعد فراغه من الواجبات المنزلية."},
+ {t:"order", q:"رتّبي أحداث قصة عائشة رضي الله عنها", words:["طرقت المرأة الباب","أعطت عائشة التمرات للمرأة","أكلت البنتان التمرتين","شقّت الأم التمرة نصفين"]},
+ {t:"mcq", hots:1, q:"لماذا شقّت الأم التمرة نصفين ولم تأكلها؟", o:["لأنها لا تحب التمر","لأنها آثرت ابنتيها على نفسها","لأن التمرة كبيرة","لأن عائشة طلبت ذلك"], a:1},
+ {t:"mcq", hots:1, q:"نفهم من قوله ﷺ «إن الله قد أوجب لها الجنة» أن الإيثار:", o:["عمل صغير","عمل عظيم الأجر","خاص بالأغنياء","لا فائدة منه"], a:1},
+ {t:"mcq", hots:1, q:"قال الوالد: «اشترِ القصة واقرأها لتعرف معنى الإيثار» ولم يشرح المعنى. لماذا؟", o:["لأنه لا يعرف المعنى","ليتعلم فوّاز القراءة والبحث بنفسه","لأنه مستعجل","لأنه غاضب"], a:1},
+ {t:"mcq", hots:1, q:"ماذا يحدث لو اتصف الناس جميعًا بالإيثار؟", o:["تنتشر المحبة ويقل الجوع","يكثر الخصام","يحزن الناس","لا يتغير شيء"], a:0},
+ {t:"mcq", hots:1, q:"أيّ عمل من أعمال فوّاز يدل على أنه يحب العلم؟", o:["جمع النقود","سأل عن معنى الإيثار وقرأ القصة","ذهب مع والده","عاد إلى البيت"], a:1},
+ {t:"write", q:"اكتبي ثلاثة أعمال أعجبتكِ قام بها فوّاز.", model:"1. جمع نقوده في حصّالته ليشتري كتابًا مفيدًا. 2. أنهى واجباته قبل الذهاب إلى المكتبة. 3. سأل والده عن معنى الإيثار وقرأ القصة."},
+ {t:"write", q:"ما رأيكِ في تصرف الأم التي شقّت التمرة؟", model:"تصرفها رائع؛ لأنها آثرت ابنتيها على نفسها، فأوجب الله لها الجنة.", hint:"ابدئي بـ: تصرفها ...؛ لأنّ ..."},
+ {t:"write", q:"أكملي كتابةً: قرّر فوّاز شراء (......)، ودار الحوار بين (......) و(......)، وكان في البيت (......) تمرات.", model:"كتاب مفيد · فوّاز · والده · ثلاث"},
+ {t:"write", q:"احكي قصة الإيثار لماما بأسلوبكِ (شفهيًا)، ثم اكتبي آخر جملة فيها.", model:"مثال: فآثرت الأم ابنتيها على نفسها، وقال ﷺ: إن الله قد أوجب لها الجنة."}
+]},
+/* ---------------- 10 ---------------- */
+{id:"i-words", kind:"word", sect:"الدرس الثاني: الإيثار", title:"كلمات الإيثار", pages:"ص 118",
+learn:[
+ {h:"معاني الكلمات", b:`<table class="mini"><tr><th>الكلمة</th><th>معناها</th></tr><tr><td>يُؤثِر</td><td>يُفضِّل</td></tr><tr><td>يَظمأ</td><td>يَعطَش</td></tr><tr><td>مُستثمِرًا</td><td>مستفيدًا</td></tr></table><p>في الجملة: فيجوعُ ليشبعَ أخوه، ويظمأُ ليرتويَ أخوه. <b>يجوع × يشبع</b> و<b>يظمأ × يرتوي</b>: العلاقة بينهما <b>تضادّ</b>.</p><p class="tip">خريطة (الإيثار): معناها تفضيل الغير على النفس · ضدها الأنانية · نوعها اسم · المضارع منها يؤثر</p>`}
+],
+ex:[
+ {t:"match", q:"صِلي الكلمة بمعناها", pairs:[["يُؤثِر","يُفضِّل"],["يَظمأ","يَعطَش"],["مستثمرًا","مستفيدًا"]]},
+ {t:"match", q:"صِلي الكلمة بضدها", pairs:[["يجوع","يشبع"],["يظمأ","يرتوي"],["الإيثار","الأنانية"]]},
+ {t:"mcq", q:"العلاقة بين (يجوع) و(يشبع):", o:["ترادف","تضادّ"], a:1},
+ {t:"mcq", q:"نوع كلمة (الإيثار):", o:["اسم","فعل","حرف"], a:0},
+ {t:"mcq", q:"الفعل المضارع من (الإيثار):", o:["آثَر","يُؤثِر","مؤثِر"], a:1},
+ {t:"mcq", hots:1, q:"(فيجوع ليشبع أخوه). نفهم من الجملة أن المسلم:", o:["يأكل طعام أخيه","يقدّم أخاه على نفسه","لا يحب الطعام","يحب الجوع"], a:1}
+]},
+/* ---------------- 11 ---------------- */
+{id:"i-gram", kind:"", sect:"الدرس الثاني: الإيثار", title:"الألف اللينة والتعجب والمعرفة", pages:"ص 119 إلى 122",
+learn:[
+ {h:"تنوين وهمزات", b:`<p><b>تنوين:</b> فوّازٌ، كتابٍ، مستثمرًا، نقودًا، طرقاتٍ، امرأةً مسكينةً، طعامًا</p><p><b>همزة وصل:</b> ردّ الوالد: <b>اشترِ</b> القصة <b>واقرأها</b> لتعرف معنى الإيثار.</p><p><b>همزة قطع</b> على نمط (أراد): أعطت، أخذت، أحضرتها، أكلت، أمّ، أبي، إيثار</p>`},
+ {h:"الألف اللينة (ى)", b:`<div class="ex">أعطت الأم كل بنت منهما نصف التمرة، وآثرت أن تطعم ابنتيها و<b>تبقى</b> جائعة.</div><p>كلمات أخرى من القصة: <b>اشترى، على، إلى، معنى</b></p>`},
+ {h:"التعجب، والمعرفة والنكرة", b:`<div class="ex">ما أجملَ الإيثارَ! · ما أحسنَ خُلُقَ المسلم!<br>ما أكثرَ القصصَ التي قرأتُها! · ما أحوجَ الفقيرَ إلى الطعام! · ما أطولَ القصةَ!</div><p>نحذف (ال) فتصبح المعرفة نكرة: المكتبة ← مكتبة · النقود ← نقود · المسلم ← مسلم · الماء ← ماء · القصة ← قصة</p><p class="tip">ومن (ال) في القصة: المكتبة، القصة، الإيثار، الوالد، المرأة</p>`}
+],
+ex:[
+ {t:"mcq", q:"أكملي بكلمة تنتهي بألف لينة: آثرت الأم أن تطعم ابنتيها و(.......) جائعة.", o:["تبقي","تبقى","تبقا"], a:1},
+ {t:"mcq", q:"الكتابة الصحيحة:", o:["اشترى","اشتري","اشترا"], a:0, why:"(اشترى فوّاز القصة): فعل ماضٍ آخره ألف لينة."},
+ {t:"sort", q:"همزة وصل أم همزة قطع؟", bins:["همزة وصل","همزة قطع"], items:[["اشترِ",0],["اقرأها",0],["أعطت",1],["أخذت",1],["أكلت",1],["أبي",1]]},
+ {t:"sort", q:"صنّفي حسب نوع التنوين", bins:["تنوين فتح ــً","تنوين كسر ــٍ","تنوين ضم ــٌ"], items:[["نقودًا",0],["طعامًا",0],["كتابٍ",1],["طرقاتٍ",1],["فوّازٌ",2]]},
+ {t:"mcq", q:"أكملي: ما (.......) الفقيرَ إلى الطعام!", o:["أحوجَ","أطولَ","أكثرَ"], a:0},
+ {t:"mcq", q:"أكملي: ما (.......) القصةَ!", o:["أحوجَ","أطولَ"], a:1},
+ {t:"mcq", q:"أكملي: ما (.......) القصصَ التي قرأتُها!", o:["أكثرَ","أحوجَ"], a:0},
+ {t:"mcq", q:"حوّلي المعرفة إلى نكرة: (المكتبة)", o:["مكتبة","المكتبات","مكتب"], a:0},
+ {t:"mcq", q:"(الماء) نكرتها:", o:["ماء","المياه","ماءً"], a:0},
+ {t:"mcq", q:"لا تنسي في آخر جملة التعجب:", o:["علامة الاستفهام ؟","علامة التعجب !","النقطة ."], a:1},
+ {t:"write", q:"استخرجي من قصة الإيثار: كلمتين فيهما تنوين فتح، وكلمتين فيهما همزة قطع.", model:"تنوين فتح: نقودًا، طعامًا (أو مستثمرًا، مشتاقًا) · همزة قطع: أعطت، أخذت (أو أبي، أكلت، أحضرتها)"},
+ {t:"write", q:"اكتبي جملة تعجب عن الإيثار.", model:"ما أجملَ الإيثارَ!"},
+ {t:"write", q:"حوّلي إلى نكرة واكتبيها في جملة: (القصة)", model:"قصة: اشترى فوّاز قصة مفيدة."}
+]},
+/* ---------------- 12 ---------------- */
+{id:"i-dict", kind:"dict", sect:"الدرس الثاني: الإيثار", title:"إملاء الإيثار", pages:"ص 121، 122",
+learn:[
+ {h:"انتبهي لهذه الكلمات", b:`<p class="tip">المؤمنين (ؤ) · طرقاتٍ (ت مفتوحة) · امرأةً (همزة وصل وتاء مربوطة) · مسكينةً · طعامًا · ثلاث تمرات · اشترى (ى) · معنى (ى) · قراءتها</p>`}
+],
+ex:[
+ {t:"dict", kind:"إملاء منسوخ", text:"سمعتْ أمُّ المؤمنينَ عائشةُ -رضيَ اللهُ عنها- طرقاتٍ على البابِ، فلمّا نظرتْ، وجدتْ امرأةً مسكينةً، ومعها ابنتاها الصغيرتانِ، وطلبتِ المرأةُ منها طعامًا، ولم يكنْ في بيتِ أمِّ المؤمنينَ عائشةَ -رضيَ اللهُ عنها- في هذا اليومِ إلا ثلاثُ تمراتٍ، فأحضرتْها، وأعطتْها المرأةَ."},
+ {t:"dict", kind:"إملاء منظور", text:"توقّفَ فوّازٌ عندَ قصةٍ عنوانُها (الإيثارُ)، فسألَ والدَه: ما معنى الإيثارِ يا أبي؟ ردَّ الوالدُ: اشترِ القصةَ، واقرأْها؛ لتعرفَ معنى الإيثارِ. اشترى فوّازٌ القصةَ، وعادَ إلى البيتِ مشتاقًا لقراءتِها."},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["المأمنين","المؤمنين","المئمنين"], a:1},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["معنا","معنى","معني"], a:1},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["طرقاة","طرقات"], a:1},
+ {t:"mcq", q:"اختاري الكتابة الصحيحة:", o:["مشتاقً","مشتاقًا"], a:1, why:"نزيد ألفًا بعد تنوين الفتح."}
+]},
+/* ---------------- 13 ---------------- */
+{id:"boss", kind:"boss", sect:"التحدي الكبير", title:"تحدي الاختبار المركزي", pages:"كل الوحدة",
+learn:[
+ {h:"نص جديد مثل الاختبار", b:`<p class="tip">في الاختبار المركزي يأتيكِ نص لم تقرئيه من قبل. اقرئيه جيدًا، ثم ارجعي إليه في كل سؤال.</p><div class="ex" style="font-size:20px">مرضَ جارُنا العمُّ صالحٌ، فلمْ يستطعْ أنْ يسقيَ حديقتَه. اتّفقَ أبناءُ الحيِّ أنْ يتعاونوا على العنايةِ بها؛ فمجموعةٌ تسقي الأشجارَ صباحًا، وأخرى تنظّفُ الممرّاتِ مساءً. وكانَ خالدٌ يحملُ كلَّ يومٍ طبقًا من طعامِ أمِّه إلى العمِّ صالحٍ، معَ أنّه يحبُّ ذلكَ الطعامَ كثيرًا. شُفيَ العمُّ صالحٌ، ونظرَ إلى حديقتِه، فقالَ: ما أجملَ الحديقةَ! ما أطيبَ قلوبَكم يا أبنائي!</div><p class="small" style="color:var(--mut)">النص من تأليفنا للتدريب، وليس من الكتاب.</p>`}
+],
+passage:"مرضَ جارُنا العمُّ صالحٌ، فلمْ يستطعْ أنْ يسقيَ حديقتَه. اتّفقَ أبناءُ الحيِّ أنْ يتعاونوا على العنايةِ بها؛ فمجموعةٌ تسقي الأشجارَ صباحًا، وأخرى تنظّفُ الممرّاتِ مساءً. وكانَ خالدٌ يحملُ كلَّ يومٍ طبقًا من طعامِ أمِّه إلى العمِّ صالحٍ، معَ أنّه يحبُّ ذلكَ الطعامَ كثيرًا. شُفيَ العمُّ صالحٌ، ونظرَ إلى حديقتِه، فقالَ: ما أجملَ الحديقةَ! ما أطيبَ قلوبَكم يا أبنائي!",
+ex:[
+ {t:"mcq", p:1, q:"لماذا لم يسقِ العم صالح حديقته؟", o:["لأنه مسافر","لأنه مريض","لأنه نسي","لأن الماء انقطع"], a:1},
+ {t:"mcq", p:1, q:"تعاون أبناء الحي على:", o:["العناية بالحديقة","بناء بيت","شراء طعام","تنظيف المسجد"], a:0},
+ {t:"mcq", p:1, hots:1, q:"حمل خالد الطعام مع أنه يحبه. هذا يدل على:", o:["الإيثار","البخل","الخوف","الكسل"], a:0},
+ {t:"mcq", p:1, hots:1, q:"نتيجة تعاون أبناء الحي:", o:["ذبلت الأشجار","بقيت الحديقة جميلة","غضب العم صالح","ترك الأبناء الحي"], a:1},
+ {t:"mcq", p:1, q:"معنى كلمة (العناية):", o:["الإهمال","الاهتمام","الزراعة","النوم"], a:1},
+ {t:"mcq", p:1, q:"ضد كلمة (مرض):", o:["تعب","شُفي","نام","جاع"], a:1},
+ {t:"mcq", p:1, q:"(ما أجملَ الحديقةَ!) أسلوب:", o:["تعجب","استفهام","نفي","أمر"], a:0},
+ {t:"mcq", p:1, q:"كلمة (خالد) نوعها:", o:["نكرة","معرّف بـ ال","عَلَم","فعل"], a:2},
+ {t:"tf", p:1, q:"كانت إحدى المجموعات تسقي الأشجار مساءً.", a:false, why:"كانت تسقيها صباحًا، والأخرى تنظّف الممرات مساءً."},
+ {t:"tf", p:1, q:"حمل خالد الطعام إلى العم صالح.", a:true},
+ {t:"mcq", p:1, q:"كلمة من النص تنتهي بألف لينة (ى):", o:["أخرى","صباحًا","الحديقة","يحبّ"], a:0},
+ {t:"mcq", p:1, q:"كلمة من النص فيها تنوين ضم:", o:["صالحٌ","صباحًا","طبقًا","صالحٍ"], a:0},
+ {t:"mcq", p:1, q:"كلمة من النص فيها حرف مضعّف:", o:["الممرّات","طبقًا","مرض","نظر"], a:0},
+ {t:"mcq", hots:1, q:"ما الذي يجمع بين فوّاز في درس التعاون وخالد في هذا النص؟", o:["كلاهما يحب اللعب","كلاهما ساعد غيره بعمل طيب","كلاهما مريض","كلاهما معلم"], a:1},
+ {t:"mcq", hots:1, q:"أيّ الآيتين تناسب عمل أبناء الحي معًا؟", o:["﴿وتعاونوا على البر والتقوى﴾","﴿ويؤثرون على أنفسهم﴾"], a:0, why:"أبناء الحي تعاونوا جميعًا، وهذا هو التعاون."},
+ {t:"order", q:"رتّبي لتكوين جملة تعجب", words:["ما","أطيبَ","قلوبَكم!"]},
+ {t:"write", q:"اكتبي إجابة تامة: لماذا قال العم صالح: ما أطيبَ قلوبَكم!؟", model:"قال العم صالح ذلك لأن أبناء الحي تعاونوا على العناية بحديقته وهو مريض."},
+ {t:"write", q:"اقترحي عنوانًا مناسبًا للنص.", model:"حديقة العم صالح (أو: جيران متعاونون)"}
+]}
+];
+/* ============ STATE ============ */
+const KEY="khuluq-v1";
+let S={xp:0,done:{},days:[],best:0,u:3};
+try{const s=JSON.parse(localStorage.getItem(KEY)||"null"); if(s) S=Object.assign(S,s);}catch(e){}
+
+const UNITS=[
+ {name:"التعامل مع الآخرين",pages:"ص 13 إلى 52",c:"#25A8AE",L:U1},
+ {name:"ربوع من بلادي",pages:"ص 53 إلى 92",c:"#2BA84A",L:U2},
+ {name:"أخلاق المسلم",pages:"ص 93 إلى 132",c:"#F26A2E",L:U3},
+ {name:"وسائل الاتصالات",pages:"ص 133 إلى 170",c:"#1767B0",L:U4}
+];
+let L=UNITS[(S.u||3)-1].L;
+
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const today=()=>new Date().toISOString().slice(0,10);
+function streak(){let n=0;const d=new Date();for(;;){const k=d.toISOString().slice(0,10);if(S.days.includes(k)){n++;d.setDate(d.getDate()-1)}else break}return n}
+const RANKS=[[0,"بذرة صغيرة"],[200,"شتلة نشيطة"],[600,"زهرة متفتحة"],[1200,"شجرة مثمرة"],[2000,"حديقة غنّاء"],[3000,"نجمة لغتي"],[4200,"بطلة لغتي"]];
+function rank(){let r=RANKS[0],nx=null;for(let i=0;i<RANKS.length;i++){if(S.xp>=RANKS[i][0]){r=RANKS[i];nx=RANKS[i+1]||null}}return{r,nx}}
+
+const app=document.getElementById("app");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const STAR=(on)=>`<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4 6.1 20.5l1.2-6.5L2.5 9.4l6.6-.9z" fill="${on?'#F5B700':'#E9DDD6'}" stroke="${on?'#D99A00':'#D9CBC3'}" stroke-width="1"/></svg>`;
+const FLAME=`<svg viewBox="0 0 24 24"><path d="M12 2c1 4 5 5.5 5 11a5 5 0 0 1-10 0c0-2.6 1.4-4 2.5-5 .2 2 1 3 2 3.2C11 9 10.6 5.5 12 2z" fill="#F26A2E"/><path d="M12 12c.8 1.6 2.5 2.2 2.5 4.3a2.5 2.5 0 0 1-5 0c0-1.3.8-2 1.6-2.6.1.9.5 1.3.9 1.4-.2-1.2 0-2.2 0-3.1z" fill="#FFC23D"/></svg>`;
+const GEM=`<svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z" fill="#25A8AE"/><path d="M2 9h20M8 3l4 6 4-6M12 21 8 9m4 12 4-12" stroke="#fff" stroke-width="1.2" fill="none" opacity=".6"/></svg>`;
+const MASCOT=(mood)=>`<svg class="mascot" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 8c22 0 38 16 38 40 0 26-17 44-38 44S12 74 12 48C12 24 28 8 50 8z" fill="#7A4A2A"/><path d="M50 14c-3 0-5-6-1-9 3 2 4 6 1 9z" fill="#2BA84A"/><ellipse cx="50" cy="52" rx="30" ry="33" fill="#9C5F36"/><circle cx="38" cy="46" r="6" fill="#fff"/><circle cx="62" cy="46" r="6" fill="#fff"/><circle cx="39" cy="47" r="3" fill="#24343A"/><circle cx="63" cy="47" r="3" fill="#24343A"/>${mood==='sad'?'<path d="M40 70q10-7 20 0" stroke="#24343A" stroke-width="3.5" fill="none" stroke-linecap="round"/>':'<path d="M38 64q12 12 24 0" stroke="#24343A" stroke-width="3.5" fill="#fff" stroke-linecap="round"/>'}<circle cx="30" cy="58" r="4" fill="#F2A18A" opacity=".8"/><circle cx="70" cy="58" r="4" fill="#F2A18A" opacity=".8"/></svg>`;
+
+/* ============ HOME ============ */
+function home(){
+  L=UNITS[S.u-1].L;
+  const {r,nx}=rank(); const pct=nx?Math.round((S.xp-r[0])/(nx[0]-r[0])*100):100;
+  const U=UNITS[S.u-1];
+  let h=`<div class="top"><div class="chip" title="أيام متتالية">${FLAME}<span>${streak()}</span></div><div class="chip" title="النقاط">${GEM}<span>${S.xp}</span></div></div>
+  <div class="hero"><h1>رحلة لغتي</h1><p>الصف الثالث · الفصل الأول</p>
+  <div class="lvl"><div class="bar"><i style="width:${pct}%"></i></div><small><span>${r[1]}</span><span>${nx?`${nx[0]-S.xp} نقطة إلى: ${nx[1]}`:"وصلتِ للقمة!"}</span></small></div></div>
+  <div class="units">${UNITS.map((u,k)=>{const got=u.L.reduce((a,l)=>a+(S.done[l.id]||0),0),all=u.L.length*3;return `<button class="ucard ${S.u===k+1?'on':''}" data-u="${k+1}"><span class="n" style="background:${u.c}">${k+1}</span><b>${u.name}</b><small>${u.pages} · ${got}/${all} نجمة</small><div class="ub"><i style="width:${Math.round(got/all*100)}%;background:${u.c}"></i></div></button>`}).join("")}</div>
+  <div class="path"><div class="sect" style="color:${U.c}">الوحدة ${S.u}: ${U.name}</div>`;
+  let sec="";
+  L.forEach((l,i)=>{
+    if(l.sect!==sec){sec=l.sect;h+=`<div class="sect" style="font-size:17px">${sec}</div>`}
+    const st=S.done[l.id]||0;
+    h+=`<button class="node ${l.kind} ${st?'done':''}" data-i="${i}"><span class="ic">${i+1}</span><span class="tx"><b>${l.title}</b><span>${l.pages} · ${l.ex.length} أسئلة</span></span><span class="stars">${STAR(st>=1)}${STAR(st>=2)}${STAR(st>=3)}</span></button>`;
+  });
+  h+=`</div><div class="parent"><b>للأم:</b> النصوص والقواعد والإملاء منقولة من كتاب الطالب (لغتي، الصف الثالث، الفصل الأول، طبعة 1448هـ). نصوص "التحدي الكبير" في الوحدات 1 و2 و4 هي نماذج الاختبار من الكتاب نفسه، ونص تحدي الوحدة 3 من تأليفنا للتدريب على نمط الأسئلة المركزية. الأسئلة البنفسجية (فكّري) أسئلة مهارات تفكير عليا. نصوص الاستماع غير موجودة في كتاب الطالب، فأخذنا منها ما في الكتاب فقط. أسئلة (اكتبي) إجابتها النموذجية للاسترشاد، وأي إجابة صحيحة بمعناها مقبولة.</div><p class="credit">تصميم وتطوير: نورة الدوسري</p>`;
+  app.innerHTML=h;
+  app.querySelectorAll(".ucard").forEach(b=>b.onclick=()=>{S.u=+b.dataset.u;save();home()});
+  app.querySelectorAll(".node").forEach(b=>b.onclick=()=>start(+b.dataset.i));
+  window.scrollTo(0,0);
+}
+
+/* ============ LESSON ENGINE ============ */
+let R;
+function start(i){
+  const l=L[i];
+  R={l,i,steps:[...l.learn.map(c=>({t:"learn",c})),...l.ex.map(e=>({t:"ex",e}))],k:0,mist:0,first:0,total:l.ex.length,combo:0,xp:0,retried:new Set()};
+  step();
+}
+function bar(){
+  const done=R.k/R.steps.length*100;
+  return `<div class="lhead"><button class="x" aria-label="خروج" id="xbtn">✕</button><div class="prog"><i style="width:${done}%"></i></div><div class="combo">${R.combo>=3?FLAME.replace('<svg','<svg style="width:18px;height:18px;vertical-align:-3px"')+R.combo:""}</div></div>`;
+}
+function step(){
+  if(R.k>=R.steps.length) return finish();
+  const s=R.steps[R.k];
+  if(s.t==="learn") return learnCard(s.c);
+  const e=s.e;
+  ({mcq,tf,match,sort,order,dict,write})[e.t](e);
+}
+function wireX(){document.getElementById("xbtn").onclick=home}
+function learnCard(c){
+  app.innerHTML=bar()+`<div class="card learn"><span class="tag">تعلّمي · ${R.l.pages}</span><h2>${c.h}</h2><div class="${c.story?'story':''}">${c.b}</div>${c.story?'<p class="tip" style="font-family:var(--f-ui);font-size:15px">اضغطي على الكلمة الملوّنة لتعرفي معناها.</p><div class="meaning" id="mean" hidden></div>':''}</div><div class="foot"><button class="btn" id="nx">فهمت، التالي</button></div>`;
+  wireX();
+  app.querySelectorAll(".gl").forEach(g=>g.onclick=()=>{const m=document.getElementById("mean");m.hidden=false;m.innerHTML=`<b>${g.textContent}</b>: ${g.dataset.m}`});
+  document.getElementById("nx").onclick=()=>{R.k++;step()};
+  window.scrollTo(0,0);
+}
+function head(e){
+  const pas=e.p&&R.l.passage?`<details style="margin-bottom:10px"><summary style="cursor:pointer;font-weight:800;color:var(--tealD)">اعرضي النص</summary><div class="ex">${R.l.passage}</div></details>`:"";
+  return bar()+`<div class="card">${pas}<span class="tag ${e.hots?'hots':''}">${e.hots?'فكّري: مهارة تفكير عليا':label(e.t)}</span><h3 class="q">${e.q||''}</h3><div id="body"></div></div><div class="foot" id="foot"><button class="btn" id="chk" disabled>تحقّقي</button></div>`;
+}
+function label(t){return {mcq:"اختاري الإجابة الصحيحة",tf:"صح أم خطأ؟",match:"لعبة التوصيل",sort:"لعبة التصنيف",order:"رتّبي الكلمات",dict:"تدريب الإملاء"}[t]}
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const PRAISE=["أحسنتِ يا بطلة!","رائعة!","ممتاز، استمري!","إجابة ذكية!","ما شاء الله عليكِ!","صحيح، أنتِ نجمة!"];
+const CHEER=["لا بأس، سنعيده لكِ في آخر الدرس.","قريبة! اقرئي التوضيح وجرّبي لاحقًا.","الخطأ يعلّمنا، تابعي!"];
+function verdict(ok,e,correctText){
+  const f=document.getElementById("foot");
+  const isRetry=R.retried.has(R.steps[R.k]);
+  if(ok){R.combo++;const add=isRetry?5:10+(R.combo>=3?5:0);R.xp+=add;if(!isRetry)R.first++;tone(true)}
+  else{R.combo=0;R.mist++;tone(false);if(!isRetry){const cp=R.steps[R.k];R.retried.add(cp);R.steps.push(cp)}}
+  f.innerHTML=`<div class="fb ${ok?'ok':'no'}"><b>${ok?PRAISE[Math.floor(Math.random()*PRAISE.length)]+(R.combo>=3?` (${R.combo} متتالية!)`:''):'الإجابة الصحيحة:'}</b>${ok?'':esc(correctText||'')}${e.why?`<div>${e.why}</div>`:''}${ok?'':`<div style="font-size:15px;margin-top:4px">${CHEER[Math.floor(Math.random()*CHEER.length)]}</div>`}</div><button class="btn ${ok?'go':'bad'}" id="nx">متابعة</button>`;
+  document.getElementById("nx").onclick=()=>{R.k++;step()};
+  document.getElementById("nx").focus();
+}
+function mcq(e){
+  app.innerHTML=head(e); wireX();
+  const b=document.getElementById("body"); const ord=e.o.map((t,i)=>({t,i}));
+  const list=e.o.length>2&&!/^(اختاري|أكملي|ما|العلامة)/.test(e.q)?shuffle(ord):ord;
+  b.innerHTML=`<div class="opts">${list.map(o=>`<button class="opt" data-i="${o.i}">${o.t}</button>`).join("")}</div>`;
+  let sel=null; const chk=document.getElementById("chk");
+  b.querySelectorAll(".opt").forEach(o=>o.onclick=()=>{b.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel"));o.classList.add("sel");sel=+o.dataset.i;chk.disabled=false});
+  chk.onclick=()=>{const ok=sel===e.a;b.querySelectorAll(".opt").forEach(o=>{o.disabled=true;if(+o.dataset.i===e.a)o.classList.add("ok");else if(+o.dataset.i===sel)o.classList.add("no")});verdict(ok,e,e.o[e.a])};
+}
+function tf(e){
+  app.innerHTML=head(e); wireX();
+  const b=document.getElementById("body");
+  b.innerHTML=`<div class="opts tf"><button class="opt" data-v="1">✓ صح</button><button class="opt" data-v="0">✗ خطأ</button></div>`;
+  let sel=null; const chk=document.getElementById("chk");
+  b.querySelectorAll(".opt").forEach(o=>o.onclick=()=>{b.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel"));o.classList.add("sel");sel=o.dataset.v==="1";chk.disabled=false});
+  chk.onclick=()=>{const ok=sel===e.a;b.querySelectorAll(".opt").forEach(o=>{o.disabled=true;const v=o.dataset.v==="1";if(v===e.a)o.classList.add("ok");else if(v===sel)o.classList.add("no")});verdict(ok,e,e.a?"صح":"خطأ")};
+}
+function match(e){
+  app.innerHTML=head(e); wireX();
+  const b=document.getElementById("body"); document.getElementById("foot").innerHTML="";
+  const A=shuffle(e.pairs.map((p,i)=>({t:p[0],i}))),B=shuffle(e.pairs.map((p,i)=>({t:p[1],i})));
+  b.innerHTML=`<div class="cols"><div>${A.map(x=>`<button class="tile" data-s="a" data-i="${x.i}">${x.t}</button>`).join("")}</div><div>${B.map(x=>`<button class="tile" data-s="b" data-i="${x.i}">${x.t}</button>`).join("")}</div></div>`;
+  let pick=null,left=e.pairs.length,miss=0;
+  b.querySelectorAll(".tile").forEach(t=>t.onclick=()=>{
+    if(!pick||pick.dataset.s===t.dataset.s){b.querySelectorAll(".tile.sel").forEach(x=>x.classList.remove("sel"));t.classList.add("sel");pick=t;return}
+    if(pick.dataset.i===t.dataset.i){[pick,t].forEach(x=>{x.classList.remove("sel");x.classList.add("gone")});tone(true,.5);left--;pick=null;if(!left)verdict(miss<2,e,"")}
+    else{miss++;tone(false,.5);[pick,t].forEach(x=>{x.classList.add("shake");setTimeout(()=>x.classList.remove("shake","sel"),350)});pick=null}
+  });
+}
+function sort(e){
+  app.innerHTML=head(e); wireX();
+  const b=document.getElementById("body"); document.getElementById("foot").innerHTML="";
+  const items=shuffle(e.items.map((x,i)=>({w:x[0],c:x[1],i})));
+  b.innerHTML=`<p style="margin:0 0 8px;color:var(--mut)">اضغطي الكلمة، ثم اضغطي الصندوق المناسب.</p><div class="pool">${items.map(x=>`<button class="tile" data-i="${x.i}">${x.w}</button>`).join("")}</div><div class="bins">${e.bins.map((n,k)=>`<div class="bin" data-k="${k}" role="button" tabindex="0"><h4>${n}</h4><div class="in"></div></div>`).join("")}</div>`;
+  let pick=null,left=items.length,miss=0;
+  b.querySelectorAll(".pool .tile").forEach(t=>t.onclick=()=>{b.querySelectorAll(".pool .tile").forEach(x=>x.classList.remove("sel"));t.classList.add("sel");pick=t});
+  b.querySelectorAll(".bin").forEach(bin=>bin.onclick=()=>{
+    if(!pick)return; const it=e.items[+pick.dataset.i];
+    if(it[1]===+bin.dataset.k){bin.querySelector(".in").insertAdjacentHTML("beforeend",`<span>${it[0]}</span>`);pick.classList.add("gone");pick.classList.remove("sel");tone(true,.5);left--;pick=null;if(!left)verdict(miss<2,e,"")}
+    else{miss++;tone(false,.5);pick.classList.add("shake");const p=pick;setTimeout(()=>p.classList.remove("shake"),350)}
+  });
+}
+function order(e){
+  app.innerHTML=head(e); wireX();
+  const b=document.getElementById("body"); const chk=document.getElementById("chk");
+  const pool=shuffle(e.words.map((w,i)=>({w,i}))); let ans=[];
+  b.innerHTML=`<div class="line" id="ln"></div><div class="pool" id="pl"></div>`;
+  const draw=()=>{
+    document.getElementById("ln").innerHTML=ans.map((x,k)=>`<button class="tile" data-k="${k}">${x.w}</button>`).join("");
+    document.getElementById("pl").innerHTML=pool.map(x=>`<button class="tile ${ans.includes(x)?'gone':''}" data-i="${x.i}">${x.w}</button>`).join("");
+    b.querySelectorAll("#pl .tile").forEach(t=>t.onclick=()=>{ans.push(pool.find(x=>x.i===+t.dataset.i));draw()});
+    b.querySelectorAll("#ln .tile").forEach(t=>t.onclick=()=>{ans.splice(+t.dataset.k,1);draw()});
+    chk.disabled=ans.length!==e.words.length;
+  };draw();
+  chk.onclick=()=>{const ok=ans.every((x,k)=>x.w===e.words[k]);b.querySelectorAll(".tile").forEach(t=>t.disabled=true);verdict(ok,e,e.words.join(" ← "))};
+}
+function write(e){
+  app.innerHTML=bar()+`<div class="card"><span class="tag" style="background:#FFF1C9;color:#7a5600">اكتبي: في دفترك أو هنا</span><h3 class="q">${e.q}</h3>${e.hint?`<p class="tip" style="font-size:15px">${e.hint}</p>`:''}<textarea id="ta" rows="3" style="width:100%;font-family:var(--f-read);font-size:19px;border:2px solid var(--line);border-radius:14px;padding:10px;background:#FFFDF8;color:var(--ink)" placeholder="اكتبي إجابتك..."></textarea><div id="mdl"></div></div><div class="foot" id="foot"><button class="btn" id="shw">انتهيت، أظهري الإجابة النموذجية</button></div>`;
+  wireX();
+  document.getElementById("shw").onclick=()=>{
+    document.getElementById("mdl").innerHTML=`<div class="fb ok" style="margin-top:10px"><b>الإجابة النموذجية</b>${e.model}</div>`;
+    document.getElementById("foot").innerHTML=`<p style="margin:0 0 8px;font-weight:800">قارني إجابتكِ (ماما تساعدك):</p><div class="row"><button class="btn go" id="g">إجابتي صحيحة</button><button class="btn bad" id="w">أحتاج تعديل</button></div>`;
+    document.getElementById("g").onclick=()=>verdict(true,{},"");
+    document.getElementById("w").onclick=()=>{R.combo=0;R.xp+=5;document.getElementById("foot").innerHTML=`<div class="fb no"><b>ممتاز أنكِ حاولتِ!</b>صحّحي إجابتك في الدفتر من الإجابة النموذجية. (+5 نقاط)</div><button class="btn" id="nx">متابعة</button>`;document.getElementById("nx").onclick=()=>{R.k++;step()}};
+  };
+}
+function dict(e){
+  app.innerHTML=bar()+`<div class="card"><span class="mk ${e.kind.includes('منظور')?'p':''}">${e.kind}</span><h3 class="q" style="font-size:19px">${e.kind.includes('منظور')?'اقرئي القطعة مرتين، ثم اضغطي (أخفي) وتمليها عليكِ ماما.':'انقلي القطعة في دفترك وأنتِ تنظرين إليها.'}</h3><div class="dictbox" id="db">${e.text}</div></div>
+  <div class="foot" id="foot"><div class="row" id="r1"><button class="btn ghost" id="hide">${e.kind.includes('منظور')?'أخفي القطعة':'انتهيتُ من النقل'}</button></div></div>`;
+  wireX();
+  document.getElementById("hide").onclick=()=>{
+    document.getElementById("db").classList.add("hide");
+    document.getElementById("foot").innerHTML=`<button class="btn ghost" id="show" style="margin-bottom:12px">أظهري القطعة للتصحيح</button>`;
+    document.getElementById("show").onclick=()=>{
+      document.getElementById("db").classList.remove("hide");
+      document.getElementById("foot").innerHTML=`<p style="margin:0 0 8px;font-weight:800">قارني كتابتك بالقطعة. كيف كانت؟</p><div class="row"><button class="btn go" id="g">كتبتها صحيحة</button><button class="btn bad" id="w">أخطأت في كلمات</button></div>`;
+      document.getElementById("g").onclick=()=>verdict(true,{why:"أحسنتِ! إملاء جميل."},"");
+      document.getElementById("w").onclick=()=>{R.combo=0;R.xp+=5;document.getElementById("foot").innerHTML=`<div class="fb no"><b>لا بأس!</b>اكتبي كل كلمة أخطأتِ فيها 3 مرات، وستكون الإجابة أسهل في المرة القادمة. (+5 نقاط لأنك حاولتِ)</div><button class="btn" id="nx">متابعة</button>`;document.getElementById("nx").onclick=()=>{R.k++;step()}};
+    };
+  };
+}
+function finish(){
+  const acc=R.total?R.first/R.total:1;
+  const stars=acc>=.9?3:acc>=.7?2:1;
+  const bonus=stars*10; R.xp+=bonus;
+  S.xp+=R.xp; S.done[R.l.id]=Math.max(S.done[R.l.id]||0,stars);
+  if(!S.days.includes(today()))S.days.push(today()); save();
+  const next=L[R.i+1];
+  app.innerHTML=`<div class="res">${MASCOT(stars>=2?'happy':'sad')}<h2>${stars===3?'مذهلة!':stars===2?'أحسنتِ!':'أكملتِ الدرس!'}</h2><p style="font-size:18px;margin:0">${R.l.title}</p>
+  <div class="bigstars">${STAR(stars>=1)}${STAR(stars>=2)}${STAR(stars>=3)}</div>
+  <div class="stats"><div class="stat"><b>+${R.xp}</b>نقطة</div><div class="stat"><b>${Math.round(acc*100)}%</b>صحيحة من أول مرة</div></div>
+  ${stars<3?'<p style="color:var(--mut)">أعيدي الدرس لتجمعي 3 نجوم!</p>':''}
+  <div style="display:grid;gap:12px;margin-top:14px">${next?`<button class="btn go" id="nxt">الدرس التالي: ${next.title}</button>`:''}<button class="btn ghost" id="again">أعيدي الدرس</button><button class="btn ghost" id="hm">طريق الوحدة</button></div></div>`;
+  if(stars>=2)confetti();
+  if(next)document.getElementById("nxt").onclick=()=>start(R.i+1);
+  document.getElementById("again").onclick=()=>start(R.i);
+  document.getElementById("hm").onclick=home;
+  window.scrollTo(0,0);
+}
+
+/* ============ SOUND + CONFETTI ============ */
+let AC=null;
+function tone(ok,vol=1){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime;(ok?[660,880]:[300,220]).forEach((f,i)=>{const o=AC.createOscillator(),g=AC.createGain();o.type=ok?"triangle":"sine";o.frequency.value=f;g.gain.setValueAtTime(.0001,t+i*.09);g.gain.exponentialRampToValueAtTime(.15*vol,t+i*.09+.02);g.gain.exponentialRampToValueAtTime(.0001,t+i*.09+.18);o.connect(g).connect(AC.destination);o.start(t+i*.09);o.stop(t+i*.09+.2)})}catch(e){}}
+function confetti(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  const c=document.getElementById("confetti"),x=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;
+  const cols=["#F26A2E","#25A8AE","#1767B0","#F5B700","#2BA84A","#F2C4B3"];
+  const P=Array.from({length:120},()=>({x:Math.random()*c.width,y:-20-Math.random()*c.height*.5,vx:(Math.random()-.5)*3,vy:2+Math.random()*3,r:Math.random()*6.28,s:5+Math.random()*6,c:cols[Math.floor(Math.random()*cols.length)]}));
+  let n=0;(function f(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=.1;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);x.restore()});if(++n<170)requestAnimationFrame(f);else x.clearRect(0,0,c.width,c.height)})();
+}
+home();
+</script>
+
+
+
+<script>
+if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}
+let deferred=null;
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;showInstall()});
+function showInstall(){
+  if(matchMedia("(display-mode: standalone)").matches||navigator.standalone)return;
+  if(document.getElementById("inst"))return;
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(!deferred&&!ios)return;
+  const b=document.createElement("div");b.id="inst";
+  b.style.cssText="position:fixed;left:0;right:0;bottom:0;z-index:60;background:#24343A;color:#fff;padding:12px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:flex;gap:10px;align-items:center;font-family:Tajawal,system-ui,sans-serif;font-size:15px;direction:rtl";
+  b.innerHTML=ios?'<span style="flex:1">ثبّتي التطبيق: اضغطي زر المشاركة <b>⎋</b> ثم <b>إضافة إلى الشاشة الرئيسية</b></span><button id="ix" style="background:none;border:0;color:#fff;font-size:22px">✕</button>':'<span style="flex:1">ثبّتي "رحلة لغتي" على جوالك مثل التطبيق</span><button id="ib" style="background:#F26A2E;color:#fff;border:0;border-radius:12px;padding:8px 14px;font-weight:800;font-family:inherit">تثبيت</button><button id="ix" style="background:none;border:0;color:#fff;font-size:22px">✕</button>';
+  document.body.appendChild(b);
+  document.getElementById("ix").onclick=()=>b.remove();
+  const ib=document.getElementById("ib");if(ib)ib.onclick=async()=>{b.remove();deferred.prompt();deferred=null};
+}
+addEventListener("load",()=>setTimeout(showInstall,1500));
+</script>
+</body>
+</html>
